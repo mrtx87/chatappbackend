@@ -1,19 +1,16 @@
 package com.section9.chatapp.entities;
 
-import java.util.List;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
 import org.springframework.lang.Nullable;
 
 @Entity
-public class User {
+public class ChatRoom {
 
 	@Id
-	public String id;
+	String id;
 	@Nullable
-	public String name;
-	@Nullable
-	public List<ChatRoom> chatRooms;
+	String Name;
+	
 }
