@@ -11,7 +11,6 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 import com.section9.chatapp.services.ChatService;
 
-@SuppressWarnings("deprecation")
 @Configuration
 @EnableWebSocketMessageBroker
 
@@ -36,9 +35,10 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
     
 
     @Bean
-    public ChatService syncService() {
+    public ChatService chatService() {
      return new ChatService();
      
     }
+    
 
 }
