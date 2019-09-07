@@ -23,11 +23,23 @@ public class ChatRoom {
 	@Nullable
 	String Name;
 	@Nullable
+
 	@ElementCollection
 	List<ChatMessage> chatMessages;
 
+	@ElementCollection
+	List<UUID> users;
+
 	public ChatRoom() {
 		// TODO Auto-generated constructor stub
+	}
+
+	public List<UUID> getUsers() {
+		return users;
+	}
+
+	public void setUsers(List<UUID> users) {
+		this.users = users;
 	}
 
 	public UUID getId() {

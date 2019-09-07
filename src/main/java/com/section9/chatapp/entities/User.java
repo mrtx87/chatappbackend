@@ -30,13 +30,13 @@ public class User {
 	List<UUID> chatRooms;
 	@Nullable
 	@ElementCollection
-	List<User> contacts;
+	List<UUID> contacts;
 	
-	public List<User> getContacts() {
+	public List<UUID> getContacts() {
 		return contacts;
 	}
 
-	public void setContacts(List<User> contacts) {
+	public void setContacts(List<UUID> contacts) {
 		this.contacts = contacts;
 	}
 

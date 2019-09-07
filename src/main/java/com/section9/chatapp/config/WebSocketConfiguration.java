@@ -9,7 +9,9 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+import com.section9.chatapp.services.ChatRoomService;
 import com.section9.chatapp.services.ChatService;
+import com.section9.chatapp.services.UserService;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -37,6 +39,18 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
     @Bean
     public ChatService chatService() {
      return new ChatService();
+     
+    }
+    
+    @Bean
+    public UserService userService() {
+     return new UserService();
+     
+    }
+    
+    @Bean
+    public ChatRoomService chatRoomService () {
+     return new ChatRoomService();
      
     }
     

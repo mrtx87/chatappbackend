@@ -7,13 +7,15 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+import org.hibernate.annotations.Filter;
+
 @Entity
 public class ChatMessage {
 
 	@Id
 	@GeneratedValue
 	UUID id;
-
+	
 	UUID roomId;
 
 	String fromId;
