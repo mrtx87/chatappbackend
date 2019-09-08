@@ -17,7 +17,6 @@ public class ChatRoom {
 	@Id
 	@GeneratedValue
 	UUID id;
-
 	@NotNull
 	String key;
 	@Nullable

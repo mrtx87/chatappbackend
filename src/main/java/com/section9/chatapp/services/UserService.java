@@ -2,6 +2,7 @@ package com.section9.chatapp.services;
 
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -28,6 +29,22 @@ public class UserService {
 	public List<User> getUsers() {
 		
 		return userRepository.findAll();
+	}
+	
+	
+	public List<User> getAllRalfs() {
+
+		return userRepository.findAll().stream().filter(u -> u.getName().equals("Ralf")).collect(Collectors.toList());
+	}
+	
+	public User getUser() {
+		
+		Optional<User> user = userRepository.findById(UUID.randomUUID());
+		if(user.isPresent()) {
+			return user.get();
+		}else {
+			return new User();
+		}
 	}
 	
 	int index = 0;

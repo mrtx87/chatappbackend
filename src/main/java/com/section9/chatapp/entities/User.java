@@ -19,18 +19,19 @@ public class User {
 
 	@Id
 	@GeneratedValue
-	UUID id;
+	private UUID id;
 	@NotNull
-	String key;
+	private String key;
+	@Nullable
 	private String name;
 	@Nullable
 	private String info;
 	@Nullable
 	@ElementCollection
-	List<UUID> chatRooms;
+	private List<UUID> chatRooms;
 	@Nullable
 	@ElementCollection
-	List<UUID> contacts;
+	private List<UUID> contacts;
 	
 	public List<UUID> getContacts() {
 		return contacts;
