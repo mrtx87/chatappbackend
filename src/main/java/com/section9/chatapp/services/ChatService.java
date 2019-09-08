@@ -1,15 +1,15 @@
 package com.section9.chatapp.services;
 
 
-import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.section9.chatapp.entities.ChatRoom;
 import com.section9.chatapp.entities.User;
+import com.section9.chatapp.repos.Credentials;
+import com.section9.chatapp.repos.UserRepository;
 
 @Service
 public class ChatService {
@@ -23,22 +23,16 @@ public class ChatService {
 	public ChatService() {
 	}
 
-	public List<User> getUsers() {
+	public Optional<User> registerUser(Credentials credentials) {
+		if(!userService.existsUserByName(credentials.getUsername())) {
+			User user = new User();
+			user.setName(credentials.getUsername());
+			user.setPassword(credentials.getPassword());
+			user.setKey(UUID.randomUUID().toString());
+			return Optional.of(userService.createUser(user));
+		}
 		
-		return userService.getUsers();
-	}
-	
-	public void addUser() {
-		userService.addUser();
-	}
-	
-	public void addRoom() {
-		chatRoomService.addRoom();
-		
-	}
-
-	public List<ChatRoom> getRooms() {
-		return chatRoomService.getRooms();
+		return Optional.empty();
 	}
 	
 }

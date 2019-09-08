@@ -22,8 +22,11 @@ public class User {
 	private UUID id;
 	@NotNull
 	private String key;
-	@Nullable
+	@NotNull
 	private String name;
+	@NotNull
+	private String password;
+
 	@Nullable
 	private String info;
 	@Nullable
@@ -32,6 +35,14 @@ public class User {
 	@Nullable
 	@ElementCollection
 	private List<UUID> contacts;
+	
+	public String getPassword() {
+		return password;
+	}
+	
+	public void setPassword(String password) {
+		this.password = password;
+	}
 	
 	public List<UUID> getContacts() {
 		return contacts;

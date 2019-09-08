@@ -57,5 +57,13 @@ public class UserService {
 		index +=1;
 		userRepository.save(user);
 	}
+
+	public boolean existsUserByName(String username) {
+		return userRepository.findAll().stream().filter(u -> username.equals(u.getName())).collect(Collectors.toList()).size() > 0;
+	}
+
+	public User createUser(User user) {
+		return userRepository.save(user);
+	}
 	
 }
