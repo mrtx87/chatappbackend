@@ -17,9 +17,7 @@ public class ChatMessage {
 	UUID id;
 	
 	UUID roomId;
-
 	String fromId;
-	String toId;
 	String body;
 	Instant createdAt;
 
@@ -48,14 +46,6 @@ public class ChatMessage {
 
 	public void setFromId(String fromId) {
 		this.fromId = fromId;
-	}
-
-	public String getToId() {
-		return toId;
-	}
-
-	public void setToId(String toId) {
-		this.toId = toId;
 	}
 
 	public String getBody() {

@@ -33,7 +33,6 @@ public class ChatRoomService {
 		
 		ChatRoom chatRoom = new ChatRoom();
 		chatRoom.setId(UUID.randomUUID());
-		chatRoom.setKey("sdfsdf");
 		chatRoom.setName("testroom");
 		chatRoom.setUsers(userRepository.findAll().stream().map(user -> user.getId()).collect(Collectors.toList()));
 		

@@ -17,10 +17,8 @@ public class ChatRoom {
 	@Id
 	@GeneratedValue
 	UUID id;
-	@NotNull
-	String key;
 	@Nullable
-	String Name;
+	String name;
 	@Nullable
 
 	@ElementCollection
@@ -28,9 +26,19 @@ public class ChatRoom {
 
 	@ElementCollection
 	List<UUID> users;
+	@Nullable
+	String iconUrl;
 
 	public ChatRoom() {
 		// TODO Auto-generated constructor stub
+	}
+
+	public String getIconUrl() {
+		return iconUrl;
+	}
+
+	public void setIconUrl(String iconUrl) {
+		this.iconUrl = iconUrl;
 	}
 
 	public List<UUID> getUsers() {
@@ -50,19 +58,11 @@ public class ChatRoom {
 	}
 
 	public String getName() {
-		return Name;
+		return name;
 	}
 
 	public void setName(String name) {
-		Name = name;
-	}
-
-	public String getKey() {
-		return key;
-	}
-
-	public void setKey(String key) {
-		this.key = key;
+		this.name = name;
 	}
 
 	public List<ChatMessage> getChatMessages() {

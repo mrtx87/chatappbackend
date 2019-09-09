@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.section9.chatapp.dtos.UserDTO;
 import com.section9.chatapp.entities.ChatRoom;
 import com.section9.chatapp.entities.User;
 import com.section9.chatapp.repos.Credentials;
@@ -68,13 +69,24 @@ public class RestController {
 	 */
 
 	@PostMapping(path = { "/data/register" })
-	public ResponseEntity<User> registerUser(@RequestBody Credentials credentials) {
-		Optional<User> user = chatService.registerUser(credentials);
+	public ResponseEntity<UserDTO> registerUser(@RequestBody Credentials credentials) {
+		Optional<UserDTO> user = chatService.registerUser(credentials);
 		if(user.isPresent()) {
 			return ResponseEntity.ok().body(user.get());
 		}else {
 			return ResponseEntity.badRequest().build();
 		}
 	}
+	
+	@PostMapping(path = { "/data/login" })
+	public ResponseEntity<UserDTO> loginUser(@RequestBody Credentials credentials) {
+		Optional<UserDTO> user = chatService.loginUser(credentials);
+		if(user.isPresent()) {
+			return ResponseEntity.ok().body(user.get());
+		}else {
+			return ResponseEntity.badRequest().build();
+		}
+	}
+
 
 }

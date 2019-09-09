@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.section9.chatapp.entities.ChatRoom;
 import com.section9.chatapp.entities.User;
 import com.section9.chatapp.repos.ChatRoomRepository;
+import com.section9.chatapp.repos.Credentials;
 import com.section9.chatapp.repos.UserRepository;
 
 @Service
@@ -32,9 +33,9 @@ public class UserService {
 	}
 	
 	
-	public List<User> getAllRalfs() {
+	public List<User> getByName(String username) {
 
-		return userRepository.findAll().stream().filter(u -> u.getName().equals("Ralf")).collect(Collectors.toList());
+		return userRepository.findByName(username);
 	}
 	
 	public User getUser() {
@@ -59,7 +60,11 @@ public class UserService {
 	}
 
 	public boolean existsUserByName(String username) {
-		return userRepository.findAll().stream().filter(u -> username.equals(u.getName())).collect(Collectors.toList()).size() > 0;
+		return 0 < userRepository.existsByName(username); //findAll().stream().filter(u -> username.equals(u.getName())).collect(Collectors.toList()).size() > 0;
+	}
+	
+	public User getUserByLogin(Credentials credentials) {
+		return userRepository.getUserByLogin(credentials.getUsername(), credentials.getPassword());
 	}
 
 	public User createUser(User user) {
