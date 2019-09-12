@@ -26,6 +26,8 @@ public class User {
 	private String name;
 	@NotNull
 	private String password;
+	@Nullable
+	private String userIcon;
 
 	@Nullable
 	private String info;

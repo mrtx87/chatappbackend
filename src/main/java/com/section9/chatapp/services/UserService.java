@@ -72,7 +72,7 @@ public class UserService {
 	}
 
 	public Optional<List<User>> searchContact(String id, String query) {
-		return userRepository.searchContact(query);
+		return userRepository.searchContact(query.toLowerCase());
 	}
 	
 }

@@ -23,6 +23,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 	@Query(value = "SELECT * FROM USER u WHERE u.name = :name AND u.password = :pw", nativeQuery = true)
 	public User getUserByLogin( @Param("name") String name, @Param("pw") String password);
 	
-	@Query(value = "SELECT * FROM USER u WHERE u.name LIKE %:query%", nativeQuery = true)
+	@Query(value = "SELECT * FROM USER u WHERE LOWER(u.name) LIKE %:query% LIMIT 10", nativeQuery = true)
 	public Optional<List<User>> searchContact(@Param("query") String query);
 }
