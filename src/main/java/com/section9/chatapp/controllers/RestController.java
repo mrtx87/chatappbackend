@@ -1,5 +1,6 @@
 package com.section9.chatapp.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,26 +37,6 @@ public class RestController {
 	 * return "error - not available"; }
 	 */
 
-	@GetMapping(path = { "/data/users" })
-	public List<User> getUsers() {
-		return null; //chatService.getUsers();
-	}
-
-	@GetMapping(path = { "/data/rooms" })
-	public List<ChatRoom> getRooms() {
-		//return chatService.getRooms();
-		return null;
-	}
-
-	@GetMapping(path = { "/data/adduser" })
-	public void addUser() {
-		//chatService.addUser();
-	}
-
-	@GetMapping(path = { "/data/addroom" })
-	public void addRoom() {
-		//chatService.addRoom();
-	}
 
 	/*
 	 * @PostMapping("/room/{raumId}/playlist")
@@ -85,6 +66,16 @@ public class RestController {
 			return ResponseEntity.ok().body(user.get());
 		}else {
 			return ResponseEntity.badRequest().build();
+		}
+	}
+	
+	@GetMapping(path = {"/data/userId/{id}/users/{query}"})
+	public ResponseEntity<List<UserDTO>> searchContact(@PathVariable("id") String id,@PathVariable("query")  String query){
+		Optional<List<UserDTO>> users = chatService.searchContact(id, query);
+		if(users.isPresent()) {
+			return ResponseEntity.ok().body(users.get());
+		}else {
+			return ResponseEntity.ok().body(new ArrayList<UserDTO>());
 		}
 	}
 

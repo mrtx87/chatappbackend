@@ -70,5 +70,9 @@ public class UserService {
 	public User createUser(User user) {
 		return userRepository.save(user);
 	}
+
+	public Optional<List<User>> searchContact(String id, String query) {
+		return userRepository.searchContact(query);
+	}
 	
 }

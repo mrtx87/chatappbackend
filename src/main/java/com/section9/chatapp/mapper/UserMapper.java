@@ -23,4 +23,12 @@ public class UserMapper {
 		user.setContacts(origin.getContacts());
 		return user;
 	}
+	
+	public static UserDTO reduce(User origin) {
+		UserDTO userDTO = new UserDTO();
+		userDTO.setId(origin.getId());
+		userDTO.setName(origin.getName());
+		userDTO.setInfo(origin.getInfo());
+		return userDTO;
+	}
 }

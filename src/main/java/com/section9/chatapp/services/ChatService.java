@@ -3,6 +3,7 @@ package com.section9.chatapp.services;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,15 @@ public class ChatService {
 		}
 
 		return Optional.empty();
+	}
+
+	public Optional<List<UserDTO>> searchContact(String id, String query) {
+		return userService
+				.searchContact(id, query)
+				.map(contacts -> contacts.stream()
+						.map(user -> UserMapper.reduce(user))
+						.collect(Collectors.toList())
+						);
 	}
 
 }
