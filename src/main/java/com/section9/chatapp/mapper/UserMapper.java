@@ -1,6 +1,7 @@
 package com.section9.chatapp.mapper;
 
 import com.section9.chatapp.dtos.UserDTO;
+import com.section9.chatapp.entities.Contact;
 import com.section9.chatapp.entities.User;
 
 public class UserMapper {
@@ -24,11 +25,11 @@ public class UserMapper {
 		return user;
 	}
 	
-	public static UserDTO reduce(User origin) {
-		UserDTO userDTO = new UserDTO();
-		userDTO.setId(origin.getId());
-		userDTO.setName(origin.getName());
-		userDTO.setInfo(origin.getInfo());
-		return userDTO;
+	public static Contact reduce(User origin) {
+		Contact contact = new Contact();
+		contact.setId(origin.getId());
+		contact.setName(origin.getName());
+		contact.setInfo(origin.getInfo());
+		return contact;
 	}
 }

@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
 import org.springframework.lang.Nullable;
 
 @Entity
-public class User {
+public class User{
 
 	@Id
 	@GeneratedValue

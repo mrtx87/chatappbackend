@@ -6,6 +6,7 @@ import java.util.UUID;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Filter;
 
@@ -15,7 +16,7 @@ public class ChatMessage {
 	@Id
 	@GeneratedValue
 	UUID id;
-	
+	@NotNull
 	UUID roomId;
 	String fromId;
 	String body;

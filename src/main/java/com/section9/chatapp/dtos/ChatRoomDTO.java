@@ -1,47 +1,40 @@
-package com.section9.chatapp.entities;
+package com.section9.chatapp.dtos;
 
 import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.validation.constraints.NotNull;
 
 import org.springframework.lang.Nullable;
 
-@Entity
-public class ChatRoom {
 
-	@Id
-	@GeneratedValue
+public class ChatRoomDTO {
+
 	UUID id;
-	@Nullable
 	String title;
-	@ElementCollection
-	List<UUID> userIds;
-	@Nullable
 	String iconUrl;
+	List<UUID> userIds;
 
-	public ChatRoom() {
+
+	public ChatRoomDTO() {
 		// TODO Auto-generated constructor stub
 	}
 
+	public List<UUID> getUserIds() {
+		return userIds;
+	}
+	
+	public void setUserIds(List<UUID> userIds) {
+		this.userIds = userIds;
+	}
 	public String getIconUrl() {
 		return iconUrl;
 	}
 
 	public void setIconUrl(String iconUrl) {
 		this.iconUrl = iconUrl;
-	}
-
-	public List<UUID> getUserIds() {
-		return userIds;
-	}
-
-	public void setUserIds(List<UUID> users) {
-		this.userIds = users;
 	}
 
 	public UUID getId() {
@@ -59,5 +52,6 @@ public class ChatRoom {
 	public void setTitle(String title) {
 		this.title = title;
 	}
+
 
 }

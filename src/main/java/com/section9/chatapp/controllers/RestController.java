@@ -3,20 +3,20 @@ package com.section9.chatapp.controllers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.ldap.embedded.EmbeddedLdapProperties.Credential;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.section9.chatapp.dtos.ChatRoomDTO;
+import com.section9.chatapp.dtos.TransferMessage;
 import com.section9.chatapp.dtos.UserDTO;
-import com.section9.chatapp.entities.ChatRoom;
-import com.section9.chatapp.entities.User;
+import com.section9.chatapp.entities.Contact;
 import com.section9.chatapp.repos.Credentials;
 import com.section9.chatapp.services.ChatService;
 
@@ -69,15 +69,38 @@ public class RestController {
 		}
 	}
 	
+	@PostMapping(path = { "/data/create-room" })
+	public ResponseEntity<ChatRoomDTO> createRoom(@RequestBody TransferMessage transferMessage) {
+		Optional<ChatRoomDTO> chatRoomDTO = chatService.createRoom(transferMessage);
+		if(chatRoomDTO.isPresent()) {
+			return ResponseEntity.ok().body(chatRoomDTO.get());
+		}else {
+			return ResponseEntity.badRequest().build();
+		}
+	}
+	
 	@GetMapping(path = {"/data/userId/{id}/users/{query}"})
-	public ResponseEntity<List<UserDTO>> searchContact(@PathVariable("id") String id,@PathVariable("query")  String query){
-		Optional<List<UserDTO>> users = chatService.searchContact(id, query);
+	public ResponseEntity<List<Contact>> searchContact(@PathVariable("id") String id,@PathVariable("query")  String query){
+		Optional<List<Contact>> users = chatService.searchContact(id, query);
 		if(users.isPresent()) {
 			return ResponseEntity.ok().body(users.get());
 		}else {
-			return ResponseEntity.ok().body(new ArrayList<UserDTO>());
+			return ResponseEntity.ok().body(new ArrayList<Contact>());
 		}
+	
 	}
+	
+	@GetMapping(path = {"/data/userId/{id}/rooms"})
+	public ResponseEntity<List<ChatRoomDTO>> getRoomsByUserId(@PathVariable("id") UUID id){
+		Optional<List<ChatRoomDTO>> chatRooms = chatService.getRoomsByUserId(id);
+		if(chatRooms.isPresent()) {
+			return ResponseEntity.ok().body(chatRooms.get());
+		}else {
+			return ResponseEntity.ok().body(new ArrayList<ChatRoomDTO>());
+		}
+	
+	}
+	
 
 
 }

@@ -3,12 +3,11 @@ package com.section9.chatapp.dtos;
 import java.util.List;
 import java.util.UUID;
 
+import com.section9.chatapp.entities.Contact;
 
-public class UserDTO {
 
-	private UUID id;
-	private String name;
-	private String info;
+public class UserDTO extends Contact{
+
 	private List<UUID> chatRooms;
 	private List<UUID> contacts;
 	
@@ -32,25 +31,5 @@ public class UserDTO {
 		this.chatRooms = chatRooms;
 	}
 
-	public UUID getId() {
-		return id;
-	}
-	public void setId(UUID id) {
-		this.id = id;
-	}
-	public String getName() {
-		return name;
-	}
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getInfo() {
-		return info;
-	}
-
-	public void setInfo(String info) {
-		this.info = info;
-	}
 
 }

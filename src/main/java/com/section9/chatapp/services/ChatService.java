@@ -8,8 +8,12 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.section9.chatapp.dtos.ChatRoomDTO;
+import com.section9.chatapp.dtos.TransferMessage;
 import com.section9.chatapp.dtos.UserDTO;
+import com.section9.chatapp.entities.Contact;
 import com.section9.chatapp.entities.User;
+import com.section9.chatapp.mapper.ChatRoomMapper;
 import com.section9.chatapp.mapper.UserMapper;
 import com.section9.chatapp.repos.Credentials;
 import com.section9.chatapp.repos.UserRepository;
@@ -22,8 +26,11 @@ public class ChatService {
 
 	@Autowired
 	ChatRoomService chatRoomService;
+	
+	ActiveUsersCache activeUsersCache;
 
 	public ChatService() {
+		activeUsersCache = new ActiveUsersCache();
 	}
 
 	public Optional<UserDTO> registerUser(Credentials credentials) {
@@ -47,13 +54,21 @@ public class ChatService {
 		return Optional.empty();
 	}
 
-	public Optional<List<UserDTO>> searchContact(String id, String query) {
+	public Optional<List<Contact>> searchContact(String id, String query) {
 		return userService
 				.searchContact(id, query)
 				.map(contacts -> contacts.stream()
 						.map(user -> UserMapper.reduce(user))
 						.collect(Collectors.toList())
 						);
+	}
+
+	public Optional<ChatRoomDTO> createRoom(TransferMessage transferMessage) {
+		return chatRoomService.createRoom(transferMessage).map(ChatRoomMapper::map);
+	}
+
+	public Optional<List<ChatRoomDTO>> getRoomsByUserId(UUID id) {
+		return chatRoomService.getRoomsByUserId(id);
 	}
 
 }
