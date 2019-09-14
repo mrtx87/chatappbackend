@@ -31,22 +31,6 @@ public class ChatRoomService {
 	public ChatRoomService() {
 	}
 
-	int index = 0;
-	
-	public void addRoom() {
-		
-		
-		
-		ChatRoom chatRoom = new ChatRoom();
-		chatRoom.setId(UUID.randomUUID());
-		chatRoom.setTitle("testroom");
-		chatRoom.setUserIds(userRepository.findAll().stream().map(user -> user.getId()).collect(Collectors.toList()));
-		
-		index +=1;
-		
-		chatRoomRepository.save(chatRoom);
-	}
-
 	public List<ChatRoom> getRooms() {
 		return chatRoomRepository.findAll();
 	}
