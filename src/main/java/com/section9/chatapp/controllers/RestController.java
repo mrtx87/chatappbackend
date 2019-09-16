@@ -28,27 +28,6 @@ public class RestController {
 	@Autowired
 	ChatService chatService;
 
-	/*
-	 * @GetMapping("/health/{secretkey}")
-	 * 
-	 * @CrossOrigin(origins = "http://localhost:4200") public String
-	 * getHealthPage(@PathVariable("secretkey") String key) { String healthPage =
-	 * syncService.getHealthPage(key); if(healthPage != null) { return healthPage; }
-	 * return "error - not available"; }
-	 */
-
-
-	/*
-	 * @PostMapping("/room/{raumId}/playlist")
-	 * 
-	 * @CrossOrigin(origins = "http://localhost:4200") public
-	 * ResponseEntity<Message> importPlaylist(@PathVariable("raumId") String
-	 * raumId, @RequestBody ImportedPlaylist importedPlaylist) {
-	 * if(syncService.importPlaylist(raumId, importedPlaylist)) { return
-	 * ResponseEntity.ok(new Message()); } return
-	 * ResponseEntity.badRequest().build(); }
-	 */
-
 	@PostMapping(path = { "/data/register" })
 	public ResponseEntity<UserDTO> registerUser(@RequestBody Credentials credentials) {
 		Optional<UserDTO> user = chatService.registerUser(credentials);

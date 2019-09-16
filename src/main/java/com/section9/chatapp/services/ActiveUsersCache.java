@@ -36,8 +36,15 @@ public class ActiveUsersCache {
 		return cache.remove(id);
 	}
 	
+	
 	public boolean exists(UUID id) {
 		return cache.containsKey(id);
+	}
+	public boolean exists(Contact contact) {
+		return exists(contact.getId());
+	}
+	public boolean exists(User user) {
+		return exists(UserMapper.reduce(user));
 	}
 	
 	

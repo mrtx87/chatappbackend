@@ -6,6 +6,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.section9.chatapp.dtos.ChatRoomDTO;
@@ -16,7 +17,6 @@ import com.section9.chatapp.entities.User;
 import com.section9.chatapp.mapper.ChatRoomMapper;
 import com.section9.chatapp.mapper.UserMapper;
 import com.section9.chatapp.repos.Credentials;
-import com.section9.chatapp.repos.UserRepository;
 
 @Service
 public class ChatService {
@@ -27,10 +27,19 @@ public class ChatService {
 	@Autowired
 	ChatRoomService chatRoomService;
 	
+	@Autowired
+	SimpMessagingTemplate messageService;
+	
 	ActiveUsersCache activeUsersCache;
 
 	public ChatService() {
 		activeUsersCache = new ActiveUsersCache();
+	}
+	
+	public void connectClient(TransferMessage transferMessage) {
+		if(!activeUsersCache.exists(transferMessage.getFrom())){
+			activeUsersCache.add(transferMessage.getFrom());
+		}
 	}
 
 	public Optional<UserDTO> registerUser(Credentials credentials) {
