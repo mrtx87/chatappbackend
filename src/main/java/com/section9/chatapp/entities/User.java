@@ -31,12 +31,7 @@ public class User{
 
 	@Nullable
 	private String info;
-	@Nullable
-	@ElementCollection
-	private List<UUID> chatRooms;
-	@Nullable
-	@ElementCollection
-	private List<UUID> contacts;
+	
 	
 	public String getPassword() {
 		return password;
@@ -45,25 +40,9 @@ public class User{
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	
-	public List<UUID> getContacts() {
-		return contacts;
-	}
-
-	public void setContacts(List<UUID> contacts) {
-		this.contacts = contacts;
-	}
 
 	public User() {
 		// TODO Auto-generated constructor stub
-	}
-
-	public List<UUID> getChatRooms() {
-		return chatRooms;
-	}
-
-	public void setChatRooms(List<UUID> chatRooms) {
-		this.chatRooms = chatRooms;
 	}
 
 	public UUID getId() {

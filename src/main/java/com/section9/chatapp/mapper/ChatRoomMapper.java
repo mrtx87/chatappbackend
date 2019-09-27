@@ -13,7 +13,7 @@ public class ChatRoomMapper {
 		return chatRoomDTO;
 	}
 	
-	public static ChatRoom map(ChatRoomDTO origin) {
+	public static ChatRoom create(ChatRoomDTO origin) {
 		ChatRoom chatRoom= new ChatRoom();	
 		chatRoom.setId(origin.getId());
 		chatRoom.setTitle(origin.getTitle());

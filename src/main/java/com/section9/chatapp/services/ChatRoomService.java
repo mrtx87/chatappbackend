@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.section9.chatapp.dtos.ChatRoomDTO;
 import com.section9.chatapp.dtos.TransferMessage;
 import com.section9.chatapp.dtos.UserDTO;
+import com.section9.chatapp.entities.ChatMessage;
 import com.section9.chatapp.entities.ChatRoom;
 import com.section9.chatapp.entities.Contact;
 import com.section9.chatapp.entities.User;
@@ -31,14 +32,20 @@ public class ChatRoomService {
 	public ChatRoomService() {
 	}
 
+	
+	 /*
+	  * Nach createRoom() muss im frontend geöffnet werden. Beteiligte(r) user benachrichtigen
+	  * 
+	  * 
+	  * 
+	  */
 	public List<ChatRoom> getRooms() {
 		return chatRoomRepository.findAll();
 	}
 
-	public Optional<ChatRoom> createRoom(TransferMessage transferMessage) {
-		ChatRoom chatRoom = ChatRoomMapper.map(transferMessage.getChatRoom());
-		chatRoom.setId(UUID.randomUUID());
-		return Optional.of(chatRoomRepository.save(chatRoom));
+	public ChatRoom createRoom(TransferMessage transferMessage) {	
+
+		return chatRoomRepository.save(ChatRoomMapper.create(transferMessage.getChatRoom()));	
 	}
 
 	public Optional<List<ChatRoomDTO>> getRoomsByUserId(UUID id) {

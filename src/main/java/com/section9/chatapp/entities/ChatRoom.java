@@ -19,8 +19,10 @@ public class ChatRoom {
 	UUID id;
 	@Nullable
 	String title;
+	
 	@ElementCollection
 	List<UUID> userIds;
+	
 	@Nullable
 	String iconUrl;
 

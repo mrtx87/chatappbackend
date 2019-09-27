@@ -10,8 +10,6 @@ public class UserMapper {
 		userDTO.setId(origin.getId());
 		userDTO.setName(origin.getName());
 		userDTO.setInfo(origin.getInfo());
-		userDTO.setChatRooms(origin.getChatRooms());
-		userDTO.setContacts(origin.getContacts());
 		return userDTO;
 	}
 	
@@ -20,8 +18,6 @@ public class UserMapper {
 		user.setId(origin.getId());
 		user.setName(origin.getName());
 		user.setInfo(origin.getInfo());
-		user.setChatRooms(origin.getChatRooms());
-		user.setContacts(origin.getContacts());
 		return user;
 	}
 	

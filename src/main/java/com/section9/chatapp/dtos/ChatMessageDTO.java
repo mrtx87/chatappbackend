@@ -1,4 +1,4 @@
-package com.section9.chatapp.entities;
+package com.section9.chatapp.dtos;
 
 import java.time.Instant;
 import java.util.List;
@@ -11,24 +11,22 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 
-@Entity
-public class ChatMessage {
+public class ChatMessageDTO {
 
-	@Id
-	@GeneratedValue
 	UUID id;
-	@NotNull
 	UUID roomId;
 	String fromId;
 	String body;
 	Instant createdAt;
 	
-	//@OneToMany
 	//List<UUID> notSeenBy;
 
-	public ChatMessage() {
+	public ChatMessageDTO() {
 	}
 
+	
+	
+	
 	/*
 	public List<UUID> getNotSeenBy() {
 		return notSeenBy;

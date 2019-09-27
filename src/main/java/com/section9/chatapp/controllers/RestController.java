@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.section9.chatapp.dtos.ChatMessageDTO;
 import com.section9.chatapp.dtos.ChatRoomDTO;
 import com.section9.chatapp.dtos.TransferMessage;
 import com.section9.chatapp.dtos.UserDTO;
+import com.section9.chatapp.entities.ChatMessage;
 import com.section9.chatapp.entities.Contact;
 import com.section9.chatapp.repos.Credentials;
 import com.section9.chatapp.services.ChatService;
@@ -80,6 +82,18 @@ public class RestController {
 	
 	}
 	
+	@GetMapping(path = {"/data/roomId/{roomId}"})
+	public ResponseEntity<List<ChatMessageDTO>> getChatMessagesByRoomId(@PathVariable("roomId") UUID roomId){
+		List<ChatMessageDTO> chatMessages = chatService.getChatMessagesByRoomId(roomId);
+		if(chatMessages != null) {
+			return ResponseEntity.ok().body(chatMessages);
+		}else {
+			return ResponseEntity.ok().body(new ArrayList<ChatMessageDTO>());
+		}
+		
+	}
+	
 
+	
 
 }

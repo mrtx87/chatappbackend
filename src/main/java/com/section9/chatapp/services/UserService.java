@@ -38,26 +38,6 @@ public class UserService {
 		return userRepository.findByName(username);
 	}
 	
-	public User getUser() {
-		
-		Optional<User> user = userRepository.findById(UUID.randomUUID());
-		if(user.isPresent()) {
-			return user.get();
-		}else {
-			return new User();
-		}
-	}
-	
-	int index = 0;
-	public void addUser() {
-		User user = new User();
-		user.setInfo("" + index);
-		user.setName("test" + index);
-		user.setKey(UUID.randomUUID().toString());
-
-		index +=1;
-		userRepository.save(user);
-	}
 
 	public boolean existsUserByName(String username) {
 		return 0 < userRepository.existsByName(username); //findAll().stream().filter(u -> username.equals(u.getName())).collect(Collectors.toList()).size() > 0;
@@ -73,6 +53,10 @@ public class UserService {
 
 	public Optional<List<User>> searchContact(String id, String query) {
 		return userRepository.searchContact(query.toLowerCase());
+	}
+	
+	public Optional<User> getUserById(UUID id) {
+		return userRepository.findById(id);
 	}
 	
 }
