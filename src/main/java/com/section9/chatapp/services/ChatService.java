@@ -1,5 +1,6 @@
 package com.section9.chatapp.services;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,21 +31,21 @@ public class ChatService {
 
 	@Autowired
 	ChatRoomService chatRoomService;
-	
-	@Autowired
-	SimpMessagingTemplate messageService;
-	
+
 	@Autowired
 	ChatMessageService chatMessageService;
-	
+
+	@Autowired
+	SimpMessagingTemplate messagingService;
+
 	ActiveUsersCache activeUsersCache;
 
 	public ChatService() {
 		activeUsersCache = new ActiveUsersCache();
 	}
-	
-	public void connectClient(TransferMessage transferMessage) {
-		if(!activeUsersCache.exists(transferMessage.getFrom())){
+
+	public void processOnlineStatusByUser(TransferMessage transferMessage) {
+		if (!activeUsersCache.exists(transferMessage.getFrom())) {
 			activeUsersCache.add(transferMessage.getFrom());
 		}
 	}
@@ -72,53 +73,108 @@ public class ChatService {
 
 	public Optional<List<Contact>> searchContact(String id, String query) {
 		UUID id_ = UUID.fromString(id);
-		User requestingUser = userService.getUserById(id_).get();
-		
-		return userService
-				.searchContact(id, query)
-				.map(contacts -> contacts.stream()
-						.filter(contact -> !contact.getId().equals(id_)) //TODO FILTER CONTACTS
-						.map(user -> UserMapper.reduce(user))
-						.collect(Collectors.toList())
-						);
+		userService.getUserById(id_).get();
+
+		return userService.searchContact(id, query)
+				.map(contacts -> contacts.stream().filter(contact -> !contact.getId().equals(id_)) // TODO FILTER
+																									// CONTACTS
+						.map(user -> UserMapper.reduce(user)).collect(Collectors.toList()));
 	}
-	
-	private ChatMessage buildChatMessage(String fromId, String body,  UUID chatRoomId, List<UUID> userIds) {
-		ChatMessage message = new ChatMessage();
-		message.setRoomId(chatRoomId);
-		message.setFromId(fromId);
-		message.setBody(body);
-		//message.setNotSeenBy(userIds);
-		return message;
-	}
-	
-	public List<ChatMessageDTO> getChatMessagesByRoomId(UUID roomId){
-		return chatMessageService
-				.getChatMessagesByRoomId(roomId)
-				.stream()
-				.map(ChatMessageMapper::map)
-				.collect(Collectors.toList());
+
+	public List<ChatMessageDTO> getChatMessagesByRoomId(UUID userId, UUID roomId) {
+		return chatMessageService.getChatMessagesByRoomId(roomId).stream().map(chatMessage -> {
+			ChatMessageDTO chatMessageDTO = ChatMessageMapper.map(chatMessage);
+			chatMessageDTO.setSeen(hasSeenChatMessage(userId, chatMessageDTO));
+			return chatMessageDTO;
+		}).collect(Collectors.toList());
 	}
 
 	public Optional<ChatRoomDTO> createRoom(TransferMessage transferMessage) {
 		ChatRoom chatRoom = chatRoomService.createRoom(transferMessage);
-		if(chatRoom != null) {
-			
-			
+		if (chatRoom != null) {
 			ChatRoomDTO chatRoomDTO = ChatRoomMapper.map(chatRoom);
-			ChatMessage initMessage = buildChatMessage(Constants.SYSTEM_ID, "New chat room created.", chatRoomDTO.getId(), chatRoomDTO.getUserIds());
-			ChatMessage savedInitMessage = chatMessageService.saveChatMessage(initMessage);
-			
+			ChatMessage initMessage = buildChatMessage(Constants.SYSTEM_ID, "New chat room created.",
+					chatRoomDTO.getId(), chatRoomDTO.getUserIds());
+			chatMessageService.saveChatMessage(initMessage);
 			return Optional.of(chatRoomDTO);
 		}
-		
 		return Optional.empty();
-
 	}
-	
-	
+
+	private boolean hasSeenChatMessage(UUID userId, ChatMessageDTO chatMessageDTO) {
+		if (chatMessageDTO.getNotSeenBy() != null) {
+			return !chatMessageDTO.getNotSeenBy().contains(userId.toString());
+		}
+		return true;
+	}
+
 	public Optional<List<ChatRoomDTO>> getRoomsByUserId(UUID id) {
 		return chatRoomService.getRoomsByUserId(id);
+	}
+
+	public void processChatMessageFromUser(TransferMessage transferMessage) {
+		Optional<ChatMessageDTO> chatMessageToBeShared = this.chatMessageService
+				.saveChatMessage(buildChatMessage(transferMessage)).map(ChatMessageMapper::map);
+		if (chatMessageToBeShared.isPresent()) {
+
+			TransferMessage response = new TransferMessage();
+			response.setFunction("chat-message");
+			response.setChatMessage(chatMessageToBeShared.get());
+
+			transferMessage.getChatRoom().getUserIds().stream().filter(userId -> activeUsersCache.exists(userId))
+					.forEach(userId -> sendMessageToClient(userId, response));
+		}
+	}
+
+	public boolean updateUnseenChatMessages(TransferMessage transferMessage) {
+
+		for (UUID chatMessageId : transferMessage.getUnseenChatMessageIds()) {
+			ChatMessage chatMessage = chatMessageService.getChatMessage(chatMessageId);
+			chatMessage
+					.setNotSeenBy(chatMessage.getNotSeenBy().replace(transferMessage.getFrom().getId().toString(), ""));
+			chatMessageService.saveChatMessage(chatMessage);
+		}
+
+		return true;
+	}
+
+	private void sendMessageToClient(UUID userId, TransferMessage response) {
+		this.messagingService.convertAndSend("/client/" + userId, response);
+	}
+
+	private String convertToNotSeenByString(List<UUID> ids) {
+		String notSeenBy = "";
+		for (int i = 0; i < ids.size(); i++) {
+			UUID id = ids.get(i);
+			if (i + 1 < ids.size()) {
+				notSeenBy += id + ",";
+			} else {
+				notSeenBy += id;
+			}
+		}
+		return notSeenBy;
+	}
+
+	private ChatMessage buildChatMessage(String fromId, String body, UUID chatRoomId, List<UUID> userIds) {
+		ChatMessage message = new ChatMessage();
+		message.setRoomId(chatRoomId);
+		message.setFromId(fromId);
+		message.setBody(body);
+		message.setCreatedAt(Instant.now());
+		message.setNotSeenBy(convertToNotSeenByString(userIds));
+		// message.setNotSeenBy(userIds);
+		return message;
+	}
+
+	private ChatMessage buildChatMessage(TransferMessage transferMessage) {
+
+		return buildChatMessage(transferMessage.getChatMessage().getFromId(),
+				transferMessage.getChatMessage().getBody(), transferMessage.getChatRoom().getId(),
+				transferMessage.getChatRoom().getUserIds());
+	}
+
+	public void processDisconnectFromClient(TransferMessage transferMessage) {
+		activeUsersCache.delete(transferMessage.getFrom().getId());
 	}
 
 }

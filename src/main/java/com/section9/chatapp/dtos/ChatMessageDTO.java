@@ -18,8 +18,8 @@ public class ChatMessageDTO {
 	String fromId;
 	String body;
 	Instant createdAt;
-	
-	//List<UUID> notSeenBy;
+	boolean seen;
+	String notSeenBy;
 
 	public ChatMessageDTO() {
 	}
@@ -76,4 +76,20 @@ public class ChatMessageDTO {
 		this.createdAt = createdAt;
 	}
 
+	public boolean isSeen() {
+		return seen;
+	}
+
+	public void setSeen(boolean seen) {
+		this.seen = seen;
+	}
+
+	public String getNotSeenBy() {
+		return notSeenBy;
+	}
+
+	public void setNotSeenBy(String notSeenBy) {
+		this.notSeenBy = notSeenBy;
+	}
+	
 }

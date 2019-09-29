@@ -59,6 +59,15 @@ public class RestController {
 			return ResponseEntity.badRequest().build();
 		}
 	}
+	@PostMapping(path = { "/data/update-unseen-messages" })
+	public ResponseEntity<ChatRoomDTO> updateUnseenChatMessages(@RequestBody TransferMessage transferMessage) {
+		boolean success = chatService.updateUnseenChatMessages(transferMessage);
+		if(success) {
+			return ResponseEntity.ok().build();
+		}else {
+			return ResponseEntity.badRequest().build();
+		}
+	}
 	
 	@GetMapping(path = {"/data/userId/{id}/users/{query}"})
 	public ResponseEntity<List<Contact>> searchContact(@PathVariable("id") String id,@PathVariable("query")  String query){
@@ -82,9 +91,9 @@ public class RestController {
 	
 	}
 	
-	@GetMapping(path = {"/data/roomId/{roomId}"})
-	public ResponseEntity<List<ChatMessageDTO>> getChatMessagesByRoomId(@PathVariable("roomId") UUID roomId){
-		List<ChatMessageDTO> chatMessages = chatService.getChatMessagesByRoomId(roomId);
+	@GetMapping(path = {"/data/userId/{userId}/roomId/{roomId}"})
+	public ResponseEntity<List<ChatMessageDTO>> getChatMessagesByRoomId(@PathVariable("userId") UUID userId, @PathVariable("roomId") UUID roomId){
+		List<ChatMessageDTO> chatMessages = chatService.getChatMessagesByRoomId(userId, roomId);
 		if(chatMessages != null) {
 			return ResponseEntity.ok().body(chatMessages);
 		}else {

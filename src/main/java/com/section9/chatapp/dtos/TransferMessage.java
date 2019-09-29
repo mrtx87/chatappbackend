@@ -11,9 +11,12 @@ public class TransferMessage {
 	private String function;
 	private Contact from;
 	private UUID chatRoomId;
-	private ChatMessage chatMessage;
+	private ChatMessageDTO chatMessage;
 	private ChatRoomDTO chatRoom;
 	private List<Contact> contactsList;
+    List<UUID> unseenChatMessageIds; 
+
+	
 	public String getFunction() {
 		return function;
 	}
@@ -32,10 +35,10 @@ public class TransferMessage {
 	public void setChatroomId(UUID chatroomId) {
 		this.chatRoomId = chatroomId;
 	}
-	public ChatMessage getChatMessage() {
+	public ChatMessageDTO getChatMessage() {
 		return chatMessage;
 	}
-	public void setChatMessage(ChatMessage chatMessage) {
+	public void setChatMessage(ChatMessageDTO chatMessage) {
 		this.chatMessage = chatMessage;
 	}
 	public ChatRoomDTO getChatRoom() {
@@ -49,6 +52,21 @@ public class TransferMessage {
 	}
 	public void setContactsList(List<Contact> contactsList) {
 		this.contactsList = contactsList;
+	}
+	public UUID getChatRoomId() {
+		return chatRoomId;
+	}
+	public void setChatRoomId(UUID chatRoomId) {
+		this.chatRoomId = chatRoomId;
+	}
+	public List<UUID> getUnseenChatMessageIds() {
+		return unseenChatMessageIds;
+	}
+	public void setUnseenChatMessageIds(List<UUID> unseenChatMessageIds) {
+		this.unseenChatMessageIds = unseenChatMessageIds;
+	}
+	public void setChatRoom(ChatRoomDTO chatRoom) {
+		this.chatRoom = chatRoom;
 	}
 
 	

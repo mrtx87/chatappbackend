@@ -53,8 +53,8 @@ public class ChatRoomService {
 		return Optional.of(
 				chatRoomRepository
 				.findAll().stream()
-				.filter(chatRoom -> chatRoom.getUserIds()
-						.contains(id)).map(ChatRoomMapper::map)
+				.filter(chatRoom -> chatRoom.getUserIds().contains(id))
+				.map(ChatRoomMapper::map)
 				.collect(Collectors.toList()));
 	}
 	

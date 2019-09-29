@@ -2,6 +2,7 @@ package com.section9.chatapp.services;
 
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,14 +20,17 @@ public class ChatMessageService {
 	public ChatMessageService() {
 	}
 
-	public ChatMessage saveChatMessage(ChatMessage message) {
+	public Optional<ChatMessage> saveChatMessage(ChatMessage message) {
 		 ChatMessage savedMessage = chatMessageRepository.save(message);
-		 
-		 return savedMessage;
+		 return Optional.of(savedMessage);
 	}
 	
+	public ChatMessage getChatMessage(UUID chatMessageId) {
+		return chatMessageRepository.getOne(chatMessageId);
+	}
 	
 	public List<ChatMessage> getChatMessagesByRoomId(UUID roomId){
+		
 		return chatMessageRepository.getChatMessagesByRoomId(roomId);
 	}
 	

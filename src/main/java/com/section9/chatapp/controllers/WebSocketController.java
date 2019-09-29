@@ -21,9 +21,19 @@ public class WebSocketController {
 		this.chatService = chatService;
 	}
 
-	@MessageMapping("/send/chat-message")
-	public void onConnectClient(@Nullable final TransferMessage transferMessage) {
-		chatService.connectClient(transferMessage);
+	@MessageMapping("/send/online-status")
+	public void onReceiveOnlineStatusByUser(@Nullable final TransferMessage transferMessage) {
+		chatService.processOnlineStatusByUser(transferMessage);
 	}
 	
+
+	@MessageMapping("/send/chat-message")
+	public void onReceiveChatMessageFromUser(@Nullable final TransferMessage transferMessage) {
+		chatService.processChatMessageFromUser(transferMessage);
+	}
+	
+	@MessageMapping("/send/disconnect-client")
+	public void onReceiveDisconnectFromClient(@Nullable final TransferMessage transferMessage) {
+		chatService.processDisconnectFromClient(transferMessage);
+	}
 }

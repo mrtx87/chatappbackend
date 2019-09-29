@@ -36,7 +36,6 @@ public class ActiveUsersCache {
 		return cache.remove(id);
 	}
 	
-	
 	public boolean exists(UUID id) {
 		return cache.containsKey(id);
 	}
@@ -46,6 +45,7 @@ public class ActiveUsersCache {
 	public boolean exists(User user) {
 		return exists(UserMapper.reduce(user));
 	}
+	
 	
 	
 	
