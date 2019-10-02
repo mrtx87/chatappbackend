@@ -4,13 +4,13 @@ package com.section9.chatapp.services;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.section9.chatapp.entities.ChatRoom;
+import com.section9.chatapp.entities.Contact;
 import com.section9.chatapp.entities.User;
+import com.section9.chatapp.mapper.UserMapper;
 import com.section9.chatapp.repos.ChatRoomRepository;
 import com.section9.chatapp.repos.Credentials;
 import com.section9.chatapp.repos.UserRepository;
@@ -48,6 +48,10 @@ public class UserService {
 	}
 
 	public User createUser(User user) {
+		return userRepository.save(user);
+	}
+	
+	public User updateUser(User user) {
 		return userRepository.save(user);
 	}
 

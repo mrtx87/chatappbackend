@@ -102,7 +102,16 @@ public class RestController {
 		
 	}
 	
-
 	
+	@GetMapping(path = {"/data/userId/{userId}/contacts"})
+	public ResponseEntity<List<Contact>> getContactsByUserId(@PathVariable("userId") UUID userId){
+		List<Contact> contacts = chatService.getContactsByUserId(userId);
+		if(contacts != null) {
+			return ResponseEntity.ok().body(contacts);
+		}else {
+			return ResponseEntity.ok().body(new ArrayList<Contact>());
+		}
+		
+	}
 
 }

@@ -1,6 +1,7 @@
 package com.section9.chatapp.services;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -77,8 +78,7 @@ public class ChatService {
 
 		return userService.searchContact(id, query)
 				.map(contacts -> contacts.stream().filter(contact -> !contact.getId().equals(id_)) // TODO FILTER
-																									// CONTACTS
-						.map(user -> UserMapper.reduce(user)).collect(Collectors.toList()));
+				.map(user -> UserMapper.reduce(user)).collect(Collectors.toList()));
 	}
 
 	public List<ChatMessageDTO> getChatMessagesByRoomId(UUID userId, UUID roomId) {
@@ -96,6 +96,18 @@ public class ChatService {
 			ChatMessage initMessage = buildChatMessage(Constants.SYSTEM_ID, "New chat room created.",
 					chatRoomDTO.getId(), chatRoomDTO.getUserIds());
 			chatMessageService.saveChatMessage(initMessage);
+			if(chatRoom.getUserIds().size() == 2) {
+				Optional<User> user1 = userService.getUserById(chatRoom.getUserIds().get(0));
+				Optional<User> user2 = userService.getUserById(chatRoom.getUserIds().get(1));
+				if(user1.isPresent() && user2.isPresent()) {
+					user1.get().getContacts().add(user2.get().getId());
+					user2.get().getContacts().add(user1.get().getId());
+					userService.updateUser(user1.get());
+					userService.updateUser(user2.get());
+				}
+
+			}
+			
 			return Optional.of(chatRoomDTO);
 		}
 		return Optional.empty();
@@ -175,6 +187,17 @@ public class ChatService {
 
 	public void processDisconnectFromClient(TransferMessage transferMessage) {
 		activeUsersCache.delete(transferMessage.getFrom().getId());
+	}
+
+	public List<Contact> getContactsByUserId(UUID userId) {
+		Optional<User> user = userService.getUserById(userId);
+		ArrayList<Contact> contacts = new ArrayList<>();
+		if(user.isPresent()) {
+			 for(UUID id : user.get().getContacts()) {
+				 contacts.add(userService.getUserById(id).map(UserMapper::reduce).get());
+			 }
+		}
+		return contacts;
 	}
 
 }

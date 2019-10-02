@@ -31,8 +31,26 @@ public class User{
 
 	@Nullable
 	private String info;
+
+	@ElementCollection
+	List<UUID> contacts;
 	
-	
+	public String getUserIcon() {
+		return userIcon;
+	}
+
+	public void setUserIcon(String userIcon) {
+		this.userIcon = userIcon;
+	}
+
+	public List<UUID> getContacts() {
+		return contacts;
+	}
+
+	public void setContacts(List<UUID> contacts) {
+		this.contacts = contacts;
+	}
+
 	public String getPassword() {
 		return password;
 	}

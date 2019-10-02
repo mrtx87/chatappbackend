@@ -1,5 +1,7 @@
 package com.section9.chatapp.mapper;
 
+import java.util.stream.Collectors;
+
 import com.section9.chatapp.dtos.UserDTO;
 import com.section9.chatapp.entities.Contact;
 import com.section9.chatapp.entities.User;
@@ -10,6 +12,7 @@ public class UserMapper {
 		userDTO.setId(origin.getId());
 		userDTO.setName(origin.getName());
 		userDTO.setInfo(origin.getInfo());
+		userDTO.setContacts(origin.getContacts());
 		return userDTO;
 	}
 	
