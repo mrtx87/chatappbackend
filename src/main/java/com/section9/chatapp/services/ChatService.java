@@ -76,11 +76,10 @@ public class ChatService {
 		UUID id_ = UUID.fromString(id);
 		final User requestingUser = userService.getUserById(id_).get();
 
-		return userService
-				.searchContact(id, query)
-				.map(contacts -> contacts
-						.stream()
-						.filter(contact -> !contact.getId().equals(id_) && !isOnContactList(contact, requestingUser.getContacts())) // TODO FILTER
+		return userService.searchContact(id, query)
+				.map(contacts -> contacts.stream()
+						.filter(contact -> !contact.getId().equals(id_)
+								&& !isOnContactList(contact, requestingUser.getContacts())) // TODO FILTER
 						.map(UserMapper::reduce).collect(Collectors.toList()));
 	}
 
@@ -99,10 +98,10 @@ public class ChatService {
 			ChatMessage initMessage = buildChatMessage(Constants.SYSTEM_ID, "New chat room created.",
 					chatRoomDTO.getId(), chatRoomDTO.getUserIds());
 			chatMessageService.saveChatMessage(initMessage);
-			if(chatRoom.getUserIds().size() == 2) {
+			if (chatRoom.getUserIds().size() == 2) {
 				Optional<User> user1 = userService.getUserById(chatRoom.getUserIds().get(0));
 				Optional<User> user2 = userService.getUserById(chatRoom.getUserIds().get(1));
-				if(user1.isPresent() && user2.isPresent()) {
+				if (user1.isPresent() && user2.isPresent()) {
 					user1.get().getContacts().add(user2.get().getId());
 					user2.get().getContacts().add(user1.get().getId());
 					user1.get().getChatRooms().add(chatRoom.getId());
@@ -111,26 +110,24 @@ public class ChatService {
 					userService.updateUser(user2.get());
 				}
 
-			}else {
-				for(UUID userId: chatRoom.getUserIds()) {
+			} else {
+				for (UUID userId : chatRoom.getUserIds()) {
 					Optional<User> user = userService.getUserById(userId);
-					if(user.isPresent()) {
+					if (user.isPresent()) {
 						user.get().getChatRooms().add(chatRoom.getId());
 						userService.updateUser(user.get());
 					}
 				}
 			}
-			
-			
-			
+
 			return Optional.of(chatRoomDTO);
 		}
 		return Optional.empty();
 	}
-	
+
 	private boolean isOnContactList(User contact, List<UUID> contactList) {
-		for(UUID id : contactList) {
-			if(id.equals(contact.getId())) {
+		for (UUID id : contactList) {
+			if (id.equals(contact.getId())) {
 				return true;
 			}
 		}
@@ -145,12 +142,12 @@ public class ChatService {
 	}
 
 	public Optional<List<ChatRoomDTO>> getRoomsByUserId(UUID id) {
-		Optional<UserDTO> user =  userService.getUserById(id).map(UserMapper::map);
-		if(user.isPresent()) {
+		Optional<UserDTO> user = userService.getUserById(id).map(UserMapper::map);
+		if (user.isPresent()) {
 			ArrayList<ChatRoomDTO> rooms = new ArrayList<>();
-			for(UUID chatRoomId: user.get().getChatRooms()) {
+			for (UUID chatRoomId : user.get().getChatRooms()) {
 				Optional<ChatRoomDTO> chatRoom = chatRoomService.getRoomById(chatRoomId).map(ChatRoomMapper::map);
-				if(chatRoom.isPresent()) {
+				if (chatRoom.isPresent()) {
 					rooms.add(chatRoom.get());
 				}
 			}
@@ -227,12 +224,16 @@ public class ChatService {
 	public List<Contact> getContactsByUserId(UUID userId) {
 		Optional<User> user = userService.getUserById(userId);
 		ArrayList<Contact> contacts = new ArrayList<>();
-		if(user.isPresent()) {
-			 for(UUID id : user.get().getContacts()) {
-				 contacts.add(userService.getUserById(id).map(UserMapper::reduce).get());
-			 }
+		if (user.isPresent()) {
+			for (UUID id : user.get().getContacts()) {
+				contacts.add(userService.getUserById(id).map(UserMapper::reduce).get());
+			}
 		}
 		return contacts;
+	}
+
+	public Contact getContactById(UUID contactId) {
+		return userService.getUserById(contactId).map(UserMapper::reduce).get();
 	}
 
 }

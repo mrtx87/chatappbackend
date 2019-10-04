@@ -69,6 +69,8 @@ public class RestController {
 		}
 	}
 	
+	
+	
 	@GetMapping(path = {"/data/userId/{id}/users/{query}"})
 	public ResponseEntity<List<Contact>> searchContact(@PathVariable("id") String id,@PathVariable("query")  String query){
 		Optional<List<Contact>> users = chatService.searchContact(id, query);
@@ -99,7 +101,16 @@ public class RestController {
 		}else {
 			return ResponseEntity.ok().body(new ArrayList<ChatMessageDTO>());
 		}
-		
+	}
+	
+	@GetMapping(path = {"/data/contactId/{contactId}"})
+	public ResponseEntity<Contact> getContactById(@PathVariable("contactId") UUID contactId){
+		Contact contact = chatService.getContactById(contactId);
+		if(contact != null) {
+			return ResponseEntity.ok().body(contact);
+		}else {
+			return ResponseEntity.ok().body(null);
+		}	
 	}
 	
 	
