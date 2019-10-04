@@ -105,15 +105,23 @@ public class ChatService {
 				if(user1.isPresent() && user2.isPresent()) {
 					user1.get().getContacts().add(user2.get().getId());
 					user2.get().getContacts().add(user1.get().getId());
-					
 					user1.get().getChatRooms().add(chatRoom.getId());
 					user2.get().getChatRooms().add(chatRoom.getId());
-
 					userService.updateUser(user1.get());
 					userService.updateUser(user2.get());
 				}
 
+			}else {
+				for(UUID userId: chatRoom.getUserIds()) {
+					Optional<User> user = userService.getUserById(userId);
+					if(user.isPresent()) {
+						user.get().getChatRooms().add(chatRoom.getId());
+						userService.updateUser(user.get());
+					}
+				}
 			}
+			
+			
 			
 			return Optional.of(chatRoomDTO);
 		}
