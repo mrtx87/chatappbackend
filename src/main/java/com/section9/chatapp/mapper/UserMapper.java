@@ -13,6 +13,7 @@ public class UserMapper {
 		userDTO.setName(origin.getName());
 		userDTO.setInfo(origin.getInfo());
 		userDTO.setContacts(origin.getContacts());
+		userDTO.setChatRooms(origin.getChatRooms());
 		return userDTO;
 	}
 	

@@ -74,11 +74,14 @@ public class ChatService {
 
 	public Optional<List<Contact>> searchContact(String id, String query) {
 		UUID id_ = UUID.fromString(id);
-		userService.getUserById(id_).get();
+		final User requestingUser = userService.getUserById(id_).get();
 
-		return userService.searchContact(id, query)
-				.map(contacts -> contacts.stream().filter(contact -> !contact.getId().equals(id_)) // TODO FILTER
-				.map(user -> UserMapper.reduce(user)).collect(Collectors.toList()));
+		return userService
+				.searchContact(id, query)
+				.map(contacts -> contacts
+						.stream()
+						.filter(contact -> !contact.getId().equals(id_) && !isOnContactList(contact, requestingUser.getContacts())) // TODO FILTER
+						.map(UserMapper::reduce).collect(Collectors.toList()));
 	}
 
 	public List<ChatMessageDTO> getChatMessagesByRoomId(UUID userId, UUID roomId) {
@@ -102,6 +105,10 @@ public class ChatService {
 				if(user1.isPresent() && user2.isPresent()) {
 					user1.get().getContacts().add(user2.get().getId());
 					user2.get().getContacts().add(user1.get().getId());
+					
+					user1.get().getChatRooms().add(chatRoom.getId());
+					user2.get().getChatRooms().add(chatRoom.getId());
+
 					userService.updateUser(user1.get());
 					userService.updateUser(user2.get());
 				}
@@ -112,6 +119,15 @@ public class ChatService {
 		}
 		return Optional.empty();
 	}
+	
+	private boolean isOnContactList(User contact, List<UUID> contactList) {
+		for(UUID id : contactList) {
+			if(id.equals(contact.getId())) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	private boolean hasSeenChatMessage(UUID userId, ChatMessageDTO chatMessageDTO) {
 		if (chatMessageDTO.getNotSeenBy() != null) {
@@ -121,7 +137,18 @@ public class ChatService {
 	}
 
 	public Optional<List<ChatRoomDTO>> getRoomsByUserId(UUID id) {
-		return chatRoomService.getRoomsByUserId(id);
+		Optional<UserDTO> user =  userService.getUserById(id).map(UserMapper::map);
+		if(user.isPresent()) {
+			ArrayList<ChatRoomDTO> rooms = new ArrayList<>();
+			for(UUID chatRoomId: user.get().getChatRooms()) {
+				Optional<ChatRoomDTO> chatRoom = chatRoomService.getRoomById(chatRoomId).map(ChatRoomMapper::map);
+				if(chatRoom.isPresent()) {
+					rooms.add(chatRoom.get());
+				}
+			}
+			return Optional.of(rooms);
+		}
+		return Optional.empty();
 	}
 
 	public void processChatMessageFromUser(TransferMessage transferMessage) {

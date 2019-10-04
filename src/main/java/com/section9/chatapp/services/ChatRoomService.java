@@ -1,6 +1,5 @@
 package com.section9.chatapp.services;
 
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,40 +21,35 @@ import com.section9.chatapp.repos.UserRepository;
 
 @Service
 public class ChatRoomService {
-	
+
 	@Autowired
-	UserRepository userRepository; //DEBUG
-	
+	UserRepository userRepository; // DEBUG
+
 	@Autowired
 	ChatRoomRepository chatRoomRepository;
-	
+
 	public ChatRoomService() {
 	}
 
-	
-	 /*
-	  * Nach createRoom() muss im frontend geöffnet werden. Beteiligte(r) user benachrichtigen
-	  * 
-	  * 
-	  * 
-	  */
+	/*
+	 * Nach createRoom() muss im frontend geöffnet werden. Beteiligte(r) user
+	 * benachrichtigen
+	 * 
+	 * 
+	 * 
+	 */
 	public List<ChatRoom> getRooms() {
 		return chatRoomRepository.findAll();
 	}
 
-	public ChatRoom createRoom(TransferMessage transferMessage) {	
+	public ChatRoom createRoom(TransferMessage transferMessage) {
 
-		return chatRoomRepository.save(ChatRoomMapper.create(transferMessage.getChatRoom()));	
+		return chatRoomRepository.save(ChatRoomMapper.create(transferMessage.getChatRoom()));
 	}
 
-	public Optional<List<ChatRoomDTO>> getRoomsByUserId(UUID id) {
+	public Optional<ChatRoom> getRoomById(UUID id) {
 
-		return Optional.of(
-				chatRoomRepository
-				.findAll().stream()
-				.filter(chatRoom -> chatRoom.getUserIds().contains(id))
-				.map(ChatRoomMapper::map)
-				.collect(Collectors.toList()));
+		return chatRoomRepository.findById(id);
 	}
-	
+
 }

@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
 import org.springframework.lang.Nullable;
 
 @Entity
-public class User{
+public class User {
 
 	@Id
 	@GeneratedValue
@@ -34,7 +34,10 @@ public class User{
 
 	@ElementCollection
 	List<UUID> contacts;
-	
+
+	@ElementCollection
+	List<UUID> chatRooms;
+
 	public String getUserIcon() {
 		return userIcon;
 	}
@@ -51,10 +54,18 @@ public class User{
 		this.contacts = contacts;
 	}
 
+	public List<UUID> getChatRooms() {
+		return chatRooms;
+	}
+
+	public void setChatRooms(List<UUID> chatRooms) {
+		this.chatRooms = chatRooms;
+	}
+
 	public String getPassword() {
 		return password;
 	}
-	
+
 	public void setPassword(String password) {
 		this.password = password;
 	}
@@ -66,12 +77,15 @@ public class User{
 	public UUID getId() {
 		return id;
 	}
+
 	public void setId(UUID id) {
 		this.id = id;
 	}
+
 	public String getName() {
 		return name;
 	}
+
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -84,7 +98,6 @@ public class User{
 		this.info = info;
 	}
 
-
 	public String getKey() {
 		return key;
 	}
@@ -93,6 +106,4 @@ public class User{
 		this.key = key;
 	}
 
-	
-	
 }
