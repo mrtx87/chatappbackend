@@ -14,6 +14,8 @@ public class UserMapper {
 		userDTO.setInfo(origin.getInfo());
 		userDTO.setContacts(origin.getContacts());
 		userDTO.setChatRooms(origin.getChatRooms());
+		userDTO.setIconUrl(origin.getIconUrl());
+
 		return userDTO;
 	}
 	
@@ -22,6 +24,7 @@ public class UserMapper {
 		user.setId(origin.getId());
 		user.setName(origin.getName());
 		user.setInfo(origin.getInfo());
+		user.setIconUrl(origin.getIconUrl());
 		return user;
 	}
 	
@@ -30,6 +33,7 @@ public class UserMapper {
 		contact.setId(origin.getId());
 		contact.setName(origin.getName());
 		contact.setInfo(origin.getInfo());
+		contact.setIconUrl(origin.getIconUrl());
 		return contact;
 	}
 }

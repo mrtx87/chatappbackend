@@ -4,11 +4,13 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 
@@ -27,7 +29,9 @@ public class User {
 	@NotNull
 	private String password;
 	@Nullable
-	private String userIcon;
+	@Lob 
+	@Column(length=1024)
+	private String iconUrl;
 
 	@Nullable
 	private String info;
@@ -38,12 +42,13 @@ public class User {
 	@ElementCollection
 	List<UUID> chatRooms;
 
-	public String getUserIcon() {
-		return userIcon;
+
+	public String getIconUrl() {
+		return iconUrl;
 	}
 
-	public void setUserIcon(String userIcon) {
-		this.userIcon = userIcon;
+	public void setIconUrl(String iconUrl) {
+		this.iconUrl = iconUrl;
 	}
 
 	public List<UUID> getContacts() {

@@ -236,4 +236,15 @@ public class ChatService {
 		return userService.getUserById(contactId).map(UserMapper::reduce).get();
 	}
 
+	public Contact updateUserProfile(UUID userId, TransferMessage transferMessage) {
+		
+		User user = userService.getUserById(userId).get();
+		user.setInfo(transferMessage.getFrom().getInfo());
+		user.setIconUrl(transferMessage.getFrom().getIconUrl());
+		user.setName(transferMessage.getFrom().getName());
+		userService.updateUser(user);
+		
+		return UserMapper.reduce(user);
+	}
+
 }

@@ -69,6 +69,17 @@ public class RestController {
 		}
 	}
 	
+	@PostMapping(path = { "/data/update/userId/{userId}" })
+	public ResponseEntity<Contact> updateUserProfile(@PathVariable("userId") UUID userId, @RequestBody TransferMessage transferMessage) {
+		Contact contact = chatService.updateUserProfile(userId, transferMessage);
+		if(contact != null) {
+			return ResponseEntity.ok().body(contact);
+		}else {
+			return ResponseEntity.badRequest().build();
+		}
+	}
+	
+	
 	
 	
 	@GetMapping(path = {"/data/userId/{id}/users/{query}"})
