@@ -125,6 +125,26 @@ public class ChatService {
 		return Optional.empty();
 	}
 
+	public Optional<List<Contact>> removeContact(TransferMessage transfermassage) {
+		List<Contact> contactsOfRoom = transfermassage.getContactsList();
+		if (contactsOfRoom.size() == 2) {
+			// TODO test
+			User user1 = userService.getUserById(contactsOfRoom.get(0).getId()).get();
+			User user2 = userService.getUserById(contactsOfRoom.get(0).getId()).get();
+			if (user1.getContacts().remove(user2.getId()) && user2.getContacts().remove(user1.getId())) {
+				return Optional.of(this.getContactsByUserId(transfermassage.getFrom().getId()));
+			} else {
+				System.err.println(String.format("At least one user could not me removed [removeContac()]. {0},{1}",
+						user1.getName(), user2.getName()));
+				return Optional.empty();
+			}
+		} else {
+			System.err.println(
+					String.format("Unsupported number of contacts ({0}) for removeContact()", contactsOfRoom.size()));
+			return Optional.empty();
+		}
+	}
+
 	private boolean isOnContactList(User contact, List<UUID> contactList) {
 		for (UUID id : contactList) {
 			if (id.equals(contact.getId())) {
@@ -237,13 +257,13 @@ public class ChatService {
 	}
 
 	public Contact updateUserProfile(UUID userId, TransferMessage transferMessage) {
-		
+
 		User user = userService.getUserById(userId).get();
 		user.setInfo(transferMessage.getFrom().getInfo());
 		user.setIconUrl(transferMessage.getFrom().getIconUrl());
 		user.setName(transferMessage.getFrom().getName());
 		userService.updateUser(user);
-		
+
 		return UserMapper.reduce(user);
 	}
 

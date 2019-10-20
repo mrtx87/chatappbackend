@@ -1,6 +1,5 @@
 package com.section9.chatapp.entities;
 
-import java.util.List;
 import java.util.UUID;
 
 public class Contact {
