@@ -126,15 +126,15 @@ public class ChatService {
 	}
 
 	public Optional<List<Contact>> removeContact(TransferMessage transfermassage) {
-		List<Contact> contactsOfRoom = transfermassage.getContactsList();
+		// TODO Ralf Baustelle
+		List<UUID> contactsOfRoom = transfermassage.getChatRoom().getUserIds();
 		if (contactsOfRoom.size() == 2) {
-			// TODO test
-			User user1 = userService.getUserById(contactsOfRoom.get(0).getId()).get();
-			User user2 = userService.getUserById(contactsOfRoom.get(0).getId()).get();
+			User user1 = userService.getUserById(contactsOfRoom.get(0)).get();
+			User user2 = userService.getUserById(contactsOfRoom.get(1)).get();
 			if (user1.getContacts().remove(user2.getId()) && user2.getContacts().remove(user1.getId())) {
 				return Optional.of(this.getContactsByUserId(transfermassage.getFrom().getId()));
 			} else {
-				System.err.println(String.format("At least one user could not me removed [removeContac()]. {0},{1}",
+				System.err.println(String.format("At least one user can not me removed [removeContac()]. {0},{1}",
 						user1.getName(), user2.getName()));
 				return Optional.empty();
 			}
