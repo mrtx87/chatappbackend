@@ -131,10 +131,24 @@ public class ChatService {
 		if (contactsOfRoom.size() == 2) {
 			User user1 = userService.getUserById(contactsOfRoom.get(0)).get();
 			User user2 = userService.getUserById(contactsOfRoom.get(1)).get();
+			
+//			System.out.println("Contacts1:");
+//			for (UUID uuid : user1.getContacts()) {
+//				String name = this.getContactById(uuid).getName();
+//				System.out.println(name);
+//			}
+//			System.out.println("Contacts2:");
+//			for (UUID uuid : user2.getContacts()) {
+//				String name = this.getContactById(uuid).getName();
+//				System.out.println(name);
+//			}
+			
 			if (user1.getContacts().remove(user2.getId()) && user2.getContacts().remove(user1.getId())) {
+				userService.updateUser(user1);
+				userService.updateUser(user2);
 				return Optional.of(this.getContactsByUserId(transfermassage.getFrom().getId()));
 			} else {
-				System.err.println(String.format("At least one user can not me removed [removeContac()]. {0},{1}",
+				System.err.println(String.format("At least one user can not be removed [removeContac()]. {0},{1}",
 						user1.getName(), user2.getName()));
 				return Optional.empty();
 			}
