@@ -24,6 +24,8 @@ import com.section9.chatapp.mapper.ChatRoomMapper;
 import com.section9.chatapp.mapper.UserMapper;
 import com.section9.chatapp.repos.Credentials;
 
+import javassist.expr.NewArray;
+
 @Service
 public class ChatService {
 
@@ -109,7 +111,6 @@ public class ChatService {
 					userService.updateUser(user1.get());
 					userService.updateUser(user2.get());
 				}
-
 			} else {
 				for (UUID userId : chatRoom.getUserIds()) {
 					Optional<User> user = userService.getUserById(userId);
@@ -129,23 +130,17 @@ public class ChatService {
 		// TODO Ralf Baustelle
 		List<UUID> contactsOfRoom = transfermassage.getChatRoom().getUserIds();
 		if (contactsOfRoom.size() == 2) {
-			User user1 = userService.getUserById(contactsOfRoom.get(0)).get();
-			User user2 = userService.getUserById(contactsOfRoom.get(1)).get();
-			
-//			System.out.println("Contacts1:");
-//			for (UUID uuid : user1.getContacts()) {
-//				String name = this.getContactById(uuid).getName();
-//				System.out.println(name);
-//			}
-//			System.out.println("Contacts2:");
-//			for (UUID uuid : user2.getContacts()) {
-//				String name = this.getContactById(uuid).getName();
-//				System.out.println(name);
-//			}
-			
+			User user1 = userService.getUserById(transfermassage.getFrom().getId()).get();
+			User user2 = userService.getUserById(getOtherUsers(contactsOfRoom, user1.getId()).get(0)).get();
 			if (user1.getContacts().remove(user2.getId()) && user2.getContacts().remove(user1.getId())) {
 				userService.updateUser(user1);
 				userService.updateUser(user2);
+				
+				if(isOnline(user2.getId())) {
+					TransferMessage transfermessageOtherUser = new TransferMessage();
+					transfermessageOtherUser.setFunction(Constants.TM_FUNCTION_UPDATE_ROOMS_AND_CONTACTS);
+					sendMessageToClient(user2.getId(), transfermessageOtherUser);
+				}
 				return Optional.of(this.getContactsByUserId(transfermassage.getFrom().getId()));
 			} else {
 				System.err.println(String.format("At least one user can not be removed [removeContac()]. {0},{1}",
@@ -157,6 +152,14 @@ public class ChatService {
 					String.format("Unsupported number of contacts ({0}) for removeContact()", contactsOfRoom.size()));
 			return Optional.empty();
 		}
+	}
+	
+	public Boolean isOnline(UUID userId) {
+		return activeUsersCache.exists(userId);
+	}
+	
+	private List<UUID> getOtherUsers(List<UUID> userList,UUID userId) {
+		return userList.stream().filter(other -> !other.equals(userId)).collect(Collectors.toList());
 	}
 
 	private boolean isOnContactList(User contact, List<UUID> contactList) {

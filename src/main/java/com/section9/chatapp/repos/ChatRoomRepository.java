@@ -20,4 +20,5 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, UUID>{
 			, nativeQuery = true)
 	public List<ChatRoom> getRoomsByUserId(@Param("userId") UUID id);
 
+	// TODO
 }

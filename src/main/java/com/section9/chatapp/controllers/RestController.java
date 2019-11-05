@@ -17,7 +17,6 @@ import com.section9.chatapp.dtos.ChatMessageDTO;
 import com.section9.chatapp.dtos.ChatRoomDTO;
 import com.section9.chatapp.dtos.TransferMessage;
 import com.section9.chatapp.dtos.UserDTO;
-import com.section9.chatapp.entities.ChatMessage;
 import com.section9.chatapp.entities.Contact;
 import com.section9.chatapp.repos.Credentials;
 import com.section9.chatapp.services.ChatService;
