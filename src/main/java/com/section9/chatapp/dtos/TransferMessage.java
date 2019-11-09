@@ -29,12 +29,6 @@ public class TransferMessage {
 	public void setFrom(Contact from) {
 		this.from = from;
 	}
-	public UUID getChatroomId() {
-		return chatRoomId;
-	}
-	public void setChatroomId(UUID chatroomId) {
-		this.chatRoomId = chatroomId;
-	}
 	public ChatMessageDTO getChatMessage() {
 		return chatMessage;
 	}
