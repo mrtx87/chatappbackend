@@ -22,13 +22,23 @@ public class ChatMessage {
 	@NotNull
 	Instant createdAt;
 	String notSeenBy;
+	String deletedFor;
 	
 	//@OneToMany
 	//List<UUID> notSeenBy;
 
+
 	public ChatMessage() {
 	}
 
+	public String getDeletedFor() {
+		return deletedFor;
+	}
+	
+	public void setDeletedFor(String deletedFor) {
+		this.deletedFor = deletedFor;
+	}
+	
 	/*
 	public List<UUID> getNotSeenBy() {
 		return notSeenBy;

@@ -28,15 +28,11 @@ public class ChatRoomService {
 	@Autowired
 	ChatRoomRepository chatRoomRepository;
 
-	public ChatRoomService() {
-	}
+	public ChatRoomService() { }
 
 	/*
 	 * Nach createRoom() muss im frontend geöffnet werden. Beteiligte(r) user
 	 * benachrichtigen
-	 * 
-	 * 
-	 * 
 	 */
 	public List<ChatRoom> getRooms() {
 		return chatRoomRepository.findAll();
@@ -48,8 +44,11 @@ public class ChatRoomService {
 	}
 
 	public Optional<ChatRoom> getRoomById(UUID id) {
-
 		return chatRoomRepository.findById(id);
+	}
+	
+	public void deleteRoomById(UUID roomId) {
+		chatRoomRepository.deleteById(roomId);
 	}
 
 }

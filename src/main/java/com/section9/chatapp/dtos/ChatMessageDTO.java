@@ -18,12 +18,24 @@ public class ChatMessageDTO {
 	String fromId;
 	String body;
 	Instant createdAt;
-	boolean seen;
+	boolean seen; // TODO still used?
 	String notSeenBy;
+	String deletedFor;
 
-	public ChatMessageDTO() {
+	
+
+
+
+
+	public ChatMessageDTO() {	}
+
+	public String getDeletedFor() {
+		return deletedFor;
 	}
-
+	
+	public void setDeletedFor(String deletedFor) {
+		this.deletedFor = deletedFor;
+	}
 	
 	
 	

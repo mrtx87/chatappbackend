@@ -19,6 +19,7 @@ import com.section9.chatapp.dtos.TransferMessage;
 import com.section9.chatapp.dtos.UserDTO;
 import com.section9.chatapp.entities.Contact;
 import com.section9.chatapp.repos.Credentials;
+import com.section9.chatapp.services.ChatMessageService;
 import com.section9.chatapp.services.ChatService;
 
 
@@ -62,6 +63,7 @@ public class RestController {
 	@PostMapping(path = { "/data/remove-contact" })
 	public ResponseEntity<List<Contact>> removeContact(@RequestBody TransferMessage transferMessage) {
 		Optional<List<Contact>> contacts = chatService.removeContact(transferMessage);
+//		Optional<List<Contact>> contacts = null;
 		if(contacts.isPresent()) {
 			return ResponseEntity.ok().body(contacts.get());
 		}else {
@@ -100,7 +102,6 @@ public class RestController {
 		}else {
 			return ResponseEntity.ok().body(new ArrayList<Contact>());
 		}
-	
 	}
 	
 	@GetMapping(path = {"/data/userId/{id}/rooms"})

@@ -19,6 +19,4 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, UUID>{
 			+ " WHERE cr.userIds LIKE :userId"
 			, nativeQuery = true)
 	public List<ChatRoom> getRoomsByUserId(@Param("userId") UUID id);
-
-	// TODO
 }

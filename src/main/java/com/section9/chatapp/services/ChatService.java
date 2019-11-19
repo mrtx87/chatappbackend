@@ -22,6 +22,7 @@ import com.section9.chatapp.entities.User;
 import com.section9.chatapp.mapper.ChatMessageMapper;
 import com.section9.chatapp.mapper.ChatRoomMapper;
 import com.section9.chatapp.mapper.UserMapper;
+import com.section9.chatapp.repos.ChatRoomRepository;
 import com.section9.chatapp.repos.Credentials;
 
 import javassist.expr.NewArray;
@@ -125,17 +126,19 @@ public class ChatService {
 		}
 		return Optional.empty();
 	}
-
+	
 	public Optional<List<Contact>> removeContact(TransferMessage transfermassage) {
-		// TODO Ralf Baustelle
 		List<UUID> contactsOfRoom = transfermassage.getChatRoom().getUserIds();
 		if (contactsOfRoom.size() == 2) {
 			User user1 = userService.getUserById(transfermassage.getFrom().getId()).get();
 			User user2 = userService.getUserById(getOtherUsers(contactsOfRoom, user1.getId()).get(0)).get();
-			if (user1.getContacts().remove(user2.getId()) && user2.getContacts().remove(user1.getId())) {
+			if (user1.getContacts().remove(user2.getId()) && user2.getContacts().remove(user1.getId()) 
+				&& user1.getChatRooms().remove(transfermassage.getChatRoom().getId())
+				&& user2.getChatRooms().remove(transfermassage.getChatRoom().getId())) {
 				userService.updateUser(user1);
 				userService.updateUser(user2);
-				
+				chatMessageService.removeChatMessagesByRoomId(transfermassage.getChatRoom().getId());
+				chatRoomService.deleteRoomById(transfermassage.getChatRoom().getId());
 				if(isOnline(user2.getId())) {
 					TransferMessage transfermessageOtherUser = new TransferMessage();
 					transfermessageOtherUser.setFunction(Constants.TM_FUNCTION_UPDATE_ROOMS_AND_CONTACTS);
@@ -143,8 +146,7 @@ public class ChatService {
 				}
 				return Optional.of(this.getContactsByUserId(transfermassage.getFrom().getId()));
 			} else {
-				System.err.println(String.format("At least one user can not be removed [removeContac()]. {0},{1}",
-						user1.getName(), user2.getName()));
+				System.err.println("Contact/ChatRoom could not be removed.");
 				return Optional.empty();
 			}
 		} else {

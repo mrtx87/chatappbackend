@@ -30,8 +30,22 @@ public class ChatMessageService {
 	}
 	
 	public List<ChatMessage> getChatMessagesByRoomId(UUID roomId){
-		
-		return chatMessageRepository.getChatMessagesByRoomId(roomId);
+		return chatMessageRepository.getChatMessagesByRoomId(roomId, 100);
+	}
+	
+	private void removeMessageById(UUID messageId) {
+		chatMessageRepository.deleteById(messageId);
+	}
+	
+	private void removeMessage(ChatMessage message) {
+		chatMessageRepository.delete(message);
+	}
+	
+	
+	
+	public void removeChatMessagesByRoomId(UUID roomId) {
+		List<ChatMessage> messagesOfRoom = chatMessageRepository.getAllChatMessagesByRoomId(roomId);
+		messagesOfRoom.stream().forEach(m -> removeMessage(m));
 	}
 	
 }
