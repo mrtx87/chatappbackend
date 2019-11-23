@@ -8,7 +8,7 @@ import com.section9.chatapp.entities.Contact;
 import com.section9.chatapp.entities.User;
 import com.section9.chatapp.mapper.UserMapper;
 
-public class ActiveUsersCache {
+public class OnlineUsers {
 
 	Map<UUID, Contact> cache;
 
@@ -20,7 +20,7 @@ public class ActiveUsersCache {
 		this.cache = cache;
 	}
 	
-	public ActiveUsersCache() {
+	public OnlineUsers() {
 		cache = new HashMap<>();
 	}
 	
