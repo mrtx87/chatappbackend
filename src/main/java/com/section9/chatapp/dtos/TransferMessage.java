@@ -15,6 +15,7 @@ public class TransferMessage {
 	private ChatRoomDTO chatRoom;
 	private List<Contact> contactsList;
     List<UUID> unseenChatMessageIds; 
+    UUID cookie;
 
 	
 	public String getFunction() {
@@ -62,6 +63,14 @@ public class TransferMessage {
 	public void setChatRoom(ChatRoomDTO chatRoom) {
 		this.chatRoom = chatRoom;
 	}
+	public UUID getCookie() {
+		return cookie;
+	}
+	public void setCookie(UUID cookie) {
+		this.cookie = cookie;
+	}
+	
+	
 
 	
 	

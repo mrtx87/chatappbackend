@@ -5,4 +5,6 @@ public class Constants {
 	
 	// TransferMessage functions
 	public static final String TM_FUNCTION_UPDATE_ROOMS_AND_CONTACTS = "update-rooms-and-contacts";
+	
+	public static final String TM_FUNCTION_SET_COOKIE = "set-cookie";
 }

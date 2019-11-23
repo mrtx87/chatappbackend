@@ -51,6 +51,11 @@ public class ChatService {
 	public void processOnlineStatusByUser(TransferMessage transferMessage) {
 		if (!activeUsersCache.exists(transferMessage.getFrom())) {
 			activeUsersCache.add(transferMessage.getFrom());
+			UUID cookie = activeUsersCache.associateUserByNewCookie(transferMessage.getFrom());
+			TransferMessage response = new TransferMessage();
+			response.setFunction(Constants.TM_FUNCTION_SET_COOKIE);
+			response.setCookie(cookie);
+			sendMessageToClient(transferMessage.getFrom().getId(), response);
 		}
 	}
 
@@ -73,6 +78,17 @@ public class ChatService {
 		}
 
 		return Optional.empty();
+	}
+	
+	public Optional<Contact> loginUserByCookie(Credentials credentials) {
+
+		Contact loggingInUser = this.activeUsersCache.getContactByCookie(credentials.getCookie());
+			if(loggingInUser != null) {
+			this.activeUsersCache.add(loggingInUser);
+			return Optional.of(loggingInUser);
+		}
+			
+			return Optional.empty();
 	}
 
 	public Optional<List<Contact>> searchContact(String id, String query) {
@@ -285,5 +301,7 @@ public class ChatService {
 
 		return UserMapper.reduce(user);
 	}
+
+	
 
 }

@@ -50,6 +50,18 @@ public class RestController {
 		}
 	}
 	
+	@PostMapping(path = { "/data/login-by-cookie" })
+	public ResponseEntity<Contact> loginUserByCookie(@RequestBody Credentials credentials) {
+		Optional<Contact> user = chatService.loginUserByCookie(credentials);
+		if(user.isPresent()) {
+			return ResponseEntity.ok().body(user.get());
+		}else {
+			return ResponseEntity.badRequest().build();
+		}
+	}
+	
+	
+	
 	@PostMapping(path = {"/data/create-room"})
 	public ResponseEntity<ChatRoomDTO> createRoom(@RequestBody TransferMessage transferMessage) {
 		Optional<ChatRoomDTO> chatRoomDTO = chatService.createRoom(transferMessage);
