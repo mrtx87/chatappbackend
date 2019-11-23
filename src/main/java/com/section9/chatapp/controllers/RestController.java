@@ -73,14 +73,19 @@ public class RestController {
 	}
 	
 	@PostMapping(path = { "/data/remove-contact" })
-	public ResponseEntity<List<Contact>> removeContact(@RequestBody TransferMessage transferMessage) {
-		Optional<List<Contact>> contacts = chatService.removeContact(transferMessage);
-//		Optional<List<Contact>> contacts = null;
-		if(contacts.isPresent()) {
-			return ResponseEntity.ok().body(contacts.get());
-		}else {
+	public ResponseEntity<Object> removeContact(@RequestBody TransferMessage transferMessage) {
+		chatService.processContactRemoving(transferMessage);
+			return ResponseEntity.ok().build();
+	}
+	
+	@PostMapping(path = { "/data/remove-chatroom" })
+	public ResponseEntity<List<Contact>> removeChatRoom(@RequestBody TransferMessage transferMessage) {
+//		chatService.removeChatRoom(transferMessage.getChatRoom());
+//		if(contacts.isPresent()) {
+//			return ResponseEntity.ok().body(contacts.get());
+//		}else {
 			return ResponseEntity.badRequest().build();
-		}
+//		}
 	}
 	
 	@PostMapping(path = { "/data/update-unseen-messages" })

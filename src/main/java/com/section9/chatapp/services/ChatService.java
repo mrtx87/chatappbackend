@@ -42,15 +42,15 @@ public class ChatService {
 	@Autowired
 	SimpMessagingTemplate messagingService;
 
-	ActiveUsersCache activeUsersCache;
+	OnlineUsers onlineUsers;
 
 	public ChatService() {
-		activeUsersCache = new ActiveUsersCache();
+		onlineUsers = new OnlineUsers();
 	}
 
 	public void processOnlineStatusByUser(TransferMessage transferMessage) {
-		if (!activeUsersCache.exists(transferMessage.getFrom())) {
-			activeUsersCache.add(transferMessage.getFrom());
+		if (!onlineUsers.exists(transferMessage.getFrom())) {
+			onlineUsers.add(transferMessage.getFrom());
 			UUID cookie = activeUsersCache.associateUserByNewCookie(transferMessage.getFrom());
 			TransferMessage response = new TransferMessage();
 			response.setFunction(Constants.TM_FUNCTION_SET_COOKIE);
@@ -142,41 +142,97 @@ public class ChatService {
 		}
 		return Optional.empty();
 	}
-	
-	public Optional<List<Contact>> removeContact(TransferMessage transfermassage) {
-		List<UUID> contactsOfRoom = transfermassage.getChatRoom().getUserIds();
-		if (contactsOfRoom.size() == 2) {
-			User user1 = userService.getUserById(transfermassage.getFrom().getId()).get();
-			User user2 = userService.getUserById(getOtherUsers(contactsOfRoom, user1.getId()).get(0)).get();
-			if (user1.getContacts().remove(user2.getId()) && user2.getContacts().remove(user1.getId()) 
-				&& user1.getChatRooms().remove(transfermassage.getChatRoom().getId())
-				&& user2.getChatRooms().remove(transfermassage.getChatRoom().getId())) {
-				userService.updateUser(user1);
-				userService.updateUser(user2);
-				chatMessageService.removeChatMessagesByRoomId(transfermassage.getChatRoom().getId());
-				chatRoomService.deleteRoomById(transfermassage.getChatRoom().getId());
-				if(isOnline(user2.getId())) {
-					TransferMessage transfermessageOtherUser = new TransferMessage();
-					transfermessageOtherUser.setFunction(Constants.TM_FUNCTION_UPDATE_ROOMS_AND_CONTACTS);
-					sendMessageToClient(user2.getId(), transfermessageOtherUser);
-				}
-				return Optional.of(this.getContactsByUserId(transfermassage.getFrom().getId()));
-			} else {
-				System.err.println("Contact/ChatRoom could not be removed.");
-				return Optional.empty();
-			}
-		} else {
-			System.err.println(
-					String.format("Unsupported number of contacts ({0}) for removeContact()", contactsOfRoom.size()));
-			return Optional.empty();
+
+	public void removeChatRoom(ChatRoomDTO room, List<User> users) {
+		chatMessageService.removeChatMessagesByRoomId(room.getId());
+		chatRoomService.deleteRoomById(room.getId());
+		// delete for each user
+		for (User user : users) {
+			user.getChatRooms().remove(room.getId());
 		}
 	}
-	
-	public Boolean isOnline(UUID userId) {
-		return activeUsersCache.exists(userId);
+
+	private List<User> getUsersById(List<UUID> ids) {
+		List<User> userList = new ArrayList<>();
+		for (UUID userId : ids) {
+			userList.add(userService.getUserById(userId).get());
+		}
+		return userList;
+	}
+
+	private void updateUsers(List<User> users) {
+		users.stream().forEach(user -> userService.updateUser(user));
 	}
 	
-	private List<UUID> getOtherUsers(List<UUID> userList,UUID userId) {
+	private void notifyUserIfOnline(UUID userId, TransferMessage transferMessage) {		
+		if (isOnline(userId)) {
+			sendMessageToClient(userId, transferMessage);
+		}
+	}
+
+	private void notifyUsers(List<User> users) {
+		TransferMessage transferMessage = new TransferMessage();
+		transferMessage.setFunction(Constants.TM_FUNCTION_UPDATE_ROOMS_AND_CONTACTS);
+		users.stream().forEach(user -> notifyUserIfOnline(user.getId(), transferMessage));
+	}
+
+	public void processContactRemoving(TransferMessage transferMessage) {
+		List<UUID> contactsOfRoom = transferMessage.getChatRoom().getUserIds();
+		if (contactsOfRoom.size() == 2) {
+			ChatRoomDTO chatRoom = transferMessage.getChatRoom();
+			List<User> userList = getUsersById(contactsOfRoom);
+			if (removeContact(userList)) {
+				removeChatRoom(chatRoom, userList);
+				updateUsers(userList);
+				notifyUsers(userList);
+			} else {
+				System.err.println("Contacts could not be removed.");
+			}
+
+		} else {
+			System.err.println("Contact/ChatRoom could not be removed.");
+		}
+	}
+
+	public void processChatRoomRemoving(TransferMessage transferMessage) {
+
+	}
+
+	private boolean removeContact(List<User> userList) {
+		User user1 = userList.get(0);
+		User user2 = userList.get(1);
+		if (user1.getContacts().contains(user2.getId()) && user2.getContacts().contains(user1.getId())) {
+			user1.getContacts().remove(user2.getId());
+			user2.getContacts().remove(user1.getId());
+			return true;
+		}
+		return false;
+	}
+//				
+//				userService.updateUser(user1);
+//				userService.updateUser(user2);
+//				removeChatRoom(transferMessage.getChatRoom());
+//				if(isOnline(user2.getId())) {
+//					TransferMessage transfermessageOtherUser = new TransferMessage();
+//					transfermessageOtherUser.setFunction(Constants.TM_FUNCTION_UPDATE_ROOMS_AND_CONTACTS);
+//					sendMessageToClient(user2.getId(), transfermessageOtherUser);
+//				}
+//				return Optional.of(this.getContactsByUserId(transferMessage.getFrom().getId()));
+//			} else {
+//				System.err.println("Contact/ChatRoom could not be removed.");
+//				return Optional.empty();
+//			}
+//		} else {
+//			System.err.println(
+//					String.format("Unsupported number of contacts ({0}) for removeContact()", contactsOfRoom.size()));
+//			return Optional.empty();
+//		}
+
+	public Boolean isOnline(UUID userId) {
+		return onlineUsers.exists(userId);
+	}
+
+	private List<UUID> getOtherUsers(List<UUID> userList, UUID userId) {
 		return userList.stream().filter(other -> !other.equals(userId)).collect(Collectors.toList());
 	}
 
@@ -220,7 +276,7 @@ public class ChatService {
 			response.setFunction("chat-message");
 			response.setChatMessage(chatMessageToBeShared.get());
 
-			transferMessage.getChatRoom().getUserIds().stream().filter(userId -> activeUsersCache.exists(userId))
+			transferMessage.getChatRoom().getUserIds().stream().filter(userId -> onlineUsers.exists(userId))
 					.forEach(userId -> sendMessageToClient(userId, response));
 		}
 	}
@@ -273,7 +329,7 @@ public class ChatService {
 	}
 
 	public void processDisconnectFromClient(TransferMessage transferMessage) {
-		activeUsersCache.delete(transferMessage.getFrom().getId());
+		onlineUsers.delete(transferMessage.getFrom().getId());
 	}
 
 	public List<Contact> getContactsByUserId(UUID userId) {
