@@ -51,7 +51,7 @@ public class ChatService {
 	public void processOnlineStatusByUser(TransferMessage transferMessage) {
 		if (!onlineUsers.exists(transferMessage.getFrom())) {
 			onlineUsers.add(transferMessage.getFrom());
-			UUID cookie = activeUsersCache.associateUserByNewCookie(transferMessage.getFrom());
+			UUID cookie = onlineUsers.associateUserByNewCookie(transferMessage.getFrom());
 			TransferMessage response = new TransferMessage();
 			response.setFunction(Constants.TM_FUNCTION_SET_COOKIE);
 			response.setCookie(cookie);
@@ -82,9 +82,9 @@ public class ChatService {
 	
 	public Optional<Contact> loginUserByCookie(Credentials credentials) {
 
-		Contact loggingInUser = this.activeUsersCache.getContactByCookie(credentials.getCookie());
+		Contact loggingInUser = this.onlineUsers.getContactByCookie(credentials.getCookie());
 			if(loggingInUser != null) {
-			this.activeUsersCache.add(loggingInUser);
+			this.onlineUsers.add(loggingInUser);
 			return Optional.of(loggingInUser);
 		}
 			
