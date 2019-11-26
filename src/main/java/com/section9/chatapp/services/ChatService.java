@@ -91,7 +91,7 @@ public class ChatService {
 
 		return Optional.empty();
 	}
-	
+
 	public Optional<Contact> loginUserByCookie(Credentials credentials) {
 
 		UUID loggingInUserId = this.onlineUsers.getContactIdByCookieId(credentials.getCookie());
@@ -99,8 +99,8 @@ public class ChatService {
 				Contact loggingInUser = this.getContactById(loggingInUserId);
 				return Optional.of(loggingInUser);
 			}
-			
-			return Optional.empty();
+
+		return Optional.empty();
 	}
 
 	public Optional<List<Contact>> searchContact(String id, String query) {
@@ -129,7 +129,7 @@ public class ChatService {
 			ChatMessage initMessage = buildChatMessage(Constants.SYSTEM_ID, "New chat room created.",
 					chatRoomDTO.getId(), chatRoomDTO.getUserIds());
 			chatMessageService.saveChatMessage(initMessage);
-			if (chatRoom.getUserIds().size() == 2) {
+			if (!chatRoom.isGroupChat()) {
 				Optional<User> user1 = userService.getUserById(chatRoom.getUserIds().get(0));
 				Optional<User> user2 = userService.getUserById(chatRoom.getUserIds().get(1));
 				if (user1.isPresent() && user2.isPresent()) {
@@ -155,8 +155,11 @@ public class ChatService {
 		return Optional.empty();
 	}
 
+	private void removeChatMessages(UUID roomId) {
+		chatMessageService.removeChatMessagesByRoomId(roomId);
+	}
+
 	public void removeChatRoom(ChatRoomDTO room, List<User> users) {
-		chatMessageService.removeChatMessagesByRoomId(room.getId());
 		chatRoomService.deleteRoomById(room.getId());
 		// delete for each user
 		for (User user : users) {
@@ -175,8 +178,8 @@ public class ChatService {
 	private void updateUsers(List<User> users) {
 		users.stream().forEach(user -> userService.updateUser(user));
 	}
-	
-	private void notifyUserIfOnline(UUID userId, TransferMessage transferMessage) {		
+
+	private void notifyUserIfOnline(UUID userId, TransferMessage transferMessage) {
 		if (isOnline(userId)) {
 			sendMessageToClient(userId, transferMessage);
 		}
@@ -193,8 +196,9 @@ public class ChatService {
 		if (contactsOfRoom.size() == 2) {
 			ChatRoomDTO chatRoom = transferMessage.getChatRoom();
 			List<User> userList = getUsersById(contactsOfRoom);
-			if (removeContact(userList)) {
+			if (unlinkContactRelation(userList)) {
 				removeChatRoom(chatRoom, userList);
+				removeChatMessages(chatRoom.getId());
 				updateUsers(userList);
 				notifyUsers(userList);
 			} else {
@@ -207,10 +211,14 @@ public class ChatService {
 	}
 
 	public void processChatRoomRemoving(TransferMessage transferMessage) {
-
+		List<User> userList = getUsersById(transferMessage.getChatRoom().getUserIds());
+		removeChatRoom(transferMessage.getChatRoom(), userList);
+		removeChatMessages(transferMessage.getChatRoom().getId());
+		updateUsers(userList);
+		notifyUsers(userList);
 	}
 
-	private boolean removeContact(List<User> userList) {
+	private boolean unlinkContactRelation(List<User> userList) {
 		User user1 = userList.get(0);
 		User user2 = userList.get(1);
 		if (user1.getContacts().contains(user2.getId()) && user2.getContacts().contains(user1.getId())) {
@@ -220,33 +228,14 @@ public class ChatService {
 		}
 		return false;
 	}
-//				
-//				userService.updateUser(user1);
-//				userService.updateUser(user2);
-//				removeChatRoom(transferMessage.getChatRoom());
-//				if(isOnline(user2.getId())) {
-//					TransferMessage transfermessageOtherUser = new TransferMessage();
-//					transfermessageOtherUser.setFunction(Constants.TM_FUNCTION_UPDATE_ROOMS_AND_CONTACTS);
-//					sendMessageToClient(user2.getId(), transfermessageOtherUser);
-//				}
-//				return Optional.of(this.getContactsByUserId(transferMessage.getFrom().getId()));
-//			} else {
-//				System.err.println("Contact/ChatRoom could not be removed.");
-//				return Optional.empty();
-//			}
-//		} else {
-//			System.err.println(
-//					String.format("Unsupported number of contacts ({0}) for removeContact()", contactsOfRoom.size()));
-//			return Optional.empty();
-//		}
 
 	public Boolean isOnline(UUID userId) {
 		return onlineUsers.exists(userId);
 	}
 
-	private List<UUID> getOtherUsers(List<UUID> userList, UUID userId) {
-		return userList.stream().filter(other -> !other.equals(userId)).collect(Collectors.toList());
-	}
+//	private List<UUID> getOtherUsers(List<UUID> userList, UUID userId) {
+//		return userList.stream().filter(other -> !other.equals(userId)).collect(Collectors.toList());
+//	}
 
 	private boolean isOnContactList(User contact, List<UUID> contactList) {
 		for (UUID id : contactList) {
@@ -370,6 +359,39 @@ public class ChatService {
 		return UserMapper.reduce(user);
 	}
 
-	
+	/* DEBUG */
+
+	int countGeneratedUsers = 0;
+	String[] userNamesList = { "default", "HusterHihi", "goran", "ester", "anna" };
+
+	public void createUsers(int numOfUsers) {
+		for (int i = 0; i < numOfUsers && (countGeneratedUsers < userNamesList.length); i++) {
+			Credentials creds = new Credentials();
+			creds.setPassword("123");
+			creds.setUsername(userNamesList[countGeneratedUsers]);
+			registerUser(creds);
+			countGeneratedUsers++;
+		}
+	}
+
+	public String displayGeneratedUsers() {
+		
+		String html = "<table>"
+				+ "<tr><td> Name </td><td> angelegt? </td></tr>";
+		
+		for (int i = 0; i < userNamesList.length; i++) {			
+			String tdName = "<td>" + userNamesList[i] + "</td>";
+			String tdStatus = "";
+			if (i + 1 <= countGeneratedUsers) {
+				tdStatus = "<td>" + "ja" + "</td>";
+			}else {
+				tdStatus = "<td>" + "-" + "</td>";
+			}
+			String row = "<tr>" + tdName + tdStatus + "</tr>";
+			html += row;
+		}
+
+		return html + "</table>";
+	}
 
 }

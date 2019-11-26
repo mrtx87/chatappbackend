@@ -80,12 +80,8 @@ public class RestController {
 	
 	@PostMapping(path = { "/data/remove-chatroom" })
 	public ResponseEntity<List<Contact>> removeChatRoom(@RequestBody TransferMessage transferMessage) {
-//		chatService.removeChatRoom(transferMessage.getChatRoom());
-//		if(contacts.isPresent()) {
-//			return ResponseEntity.ok().body(contacts.get());
-//		}else {
-			return ResponseEntity.badRequest().build();
-//		}
+		chatService.processChatRoomRemoving(transferMessage);
+			return ResponseEntity.ok().build();
 	}
 	
 	@PostMapping(path = { "/data/update-unseen-messages" })
@@ -162,6 +158,26 @@ public class RestController {
 			return ResponseEntity.ok().body(new ArrayList<Contact>());
 		}
 		
+		
 	}
+	
+	
+	/* DEBUG  */
+	
+	
+	@GetMapping(path = {"/data/create-users/{number}"})
+	public ResponseEntity<Object> createUsers(@PathVariable("number") int count){
+		
+		chatService.createUsers(count);
+		return ResponseEntity.ok().build();
+	}
+	
+	@GetMapping(path = {"/data/display-generated-users"})
+	public ResponseEntity<String> displayGeneratedUsers(){
+		
+		
+		return ResponseEntity.ok().body(chatService.displayGeneratedUsers());
+	}
+	
 
 }

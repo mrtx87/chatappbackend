@@ -10,6 +10,7 @@ public class ChatRoomMapper {
 		chatRoomDTO.setTitle(origin.getTitle());
 		chatRoomDTO.setUserIds(origin.getUserIds());
 		chatRoomDTO.setIconUrl(origin.getIconUrl());
+		chatRoomDTO.setGroupChat(origin.isGroupChat());
 		return chatRoomDTO;
 	}
 	
@@ -19,6 +20,7 @@ public class ChatRoomMapper {
 		chatRoom.setTitle(origin.getTitle());
 		chatRoom.setUserIds(origin.getUserIds());
 		chatRoom.setIconUrl(origin.getIconUrl());
+		chatRoom.setGroupChat(origin.isGroupChat());
 		return chatRoom;
 	}
 }

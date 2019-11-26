@@ -29,9 +29,21 @@ public class ChatRoom {
 	@Lob 
 	@Column(length=1024)
 	String iconUrl;
+	
+	@NotNull
+	boolean groupChat;
+
 
 	public ChatRoom() {
 		// TODO Auto-generated constructor stub
+	}
+	
+	public boolean isGroupChat() {
+		return groupChat;
+	}
+	
+	public void setGroupChat(boolean groupChat) {
+		this.groupChat = groupChat;
 	}
 
 	public String getIconUrl() {
