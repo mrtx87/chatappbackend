@@ -18,6 +18,7 @@ import com.section9.chatapp.dtos.UserDTO;
 import com.section9.chatapp.entities.ChatMessage;
 import com.section9.chatapp.entities.ChatRoom;
 import com.section9.chatapp.entities.Contact;
+import com.section9.chatapp.entities.Cookie;
 import com.section9.chatapp.entities.User;
 import com.section9.chatapp.mapper.ChatMessageMapper;
 import com.section9.chatapp.mapper.ChatRoomMapper;
@@ -42,20 +43,29 @@ public class ChatService {
 	@Autowired
 	SimpMessagingTemplate messagingService;
 
+	@Autowired
 	OnlineUsers onlineUsers;
+	
+	@Autowired
+	CookieService cookieService;
+	
 
 	public ChatService() {
 		onlineUsers = new OnlineUsers();
 	}
+	
 
-	public void processOnlineStatusByUser(TransferMessage transferMessage) {
-		if (!onlineUsers.exists(transferMessage.getFrom())) {
-			onlineUsers.add(transferMessage.getFrom());
-			UUID cookie = onlineUsers.associateUserByNewCookie(transferMessage.getFrom());
-			TransferMessage response = new TransferMessage();
-			response.setFunction(Constants.TM_FUNCTION_SET_COOKIE);
-			response.setCookie(cookie);
-			sendMessageToClient(transferMessage.getFrom().getId(), response);
+	public void processOnlineStatusByUser(Contact contact) {
+		if (!onlineUsers.exists(contact)) {
+			onlineUsers.add(contact);
+			
+			if(!cookieService.hasCookie(contact.getId())) { 
+				UUID cookie = onlineUsers.associateUserByNewCookie(contact);
+				TransferMessage response = new TransferMessage();
+				response.setFunction(Constants.TM_FUNCTION_SET_COOKIE);
+				response.setCookie(cookie);
+				sendMessageToClient(contact.getId(), response);
+			}
 		}
 	}
 
@@ -65,6 +75,7 @@ public class ChatService {
 			user.setName(credentials.getUsername());
 			user.setPassword(credentials.getPassword());
 			user.setKey(UUID.randomUUID().toString());
+			processOnlineStatusByUser(UserMapper.reduce(user));
 			return Optional.of(UserMapper.map(userService.createUser(user)));
 		}
 
@@ -74,6 +85,7 @@ public class ChatService {
 	public Optional<UserDTO> loginUser(Credentials credentials) {
 		User user = userService.getUserByLogin(credentials);
 		if (user != null) {
+			processOnlineStatusByUser(UserMapper.reduce(user));
 			return Optional.of(UserMapper.map(user));
 		}
 
@@ -82,11 +94,11 @@ public class ChatService {
 	
 	public Optional<Contact> loginUserByCookie(Credentials credentials) {
 
-		Contact loggingInUser = this.onlineUsers.getContactByCookie(credentials.getCookie());
-			if(loggingInUser != null) {
-			this.onlineUsers.add(loggingInUser);
-			return Optional.of(loggingInUser);
-		}
+		UUID loggingInUserId = this.onlineUsers.getContactIdByCookieId(credentials.getCookie());
+			if(loggingInUserId != null) {
+				Contact loggingInUser = this.getContactById(loggingInUserId);
+				return Optional.of(loggingInUser);
+			}
 			
 			return Optional.empty();
 	}

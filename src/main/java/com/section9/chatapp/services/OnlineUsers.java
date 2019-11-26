@@ -4,12 +4,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.section9.chatapp.entities.Contact;
+import com.section9.chatapp.entities.Cookie;
 import com.section9.chatapp.entities.User;
 import com.section9.chatapp.mapper.UserMapper;
 
+@Service
 public class OnlineUsers {
 
+	@Autowired
+	CookieService cookieService;
+	
+	
+	
 	Map<UUID, Contact> cache;
 	Map<UUID, Contact> userByCookie;
 
@@ -51,13 +61,18 @@ public class OnlineUsers {
 	}
 	
 	public UUID associateUserByNewCookie(Contact contact) {
-		UUID cookie = UUID.randomUUID();
-		userByCookie.put(cookie, contact);
-		return cookie;
+		UUID cookieId = UUID.randomUUID();
+		Cookie cookie = new Cookie();
+		cookie.setCookieId(cookieId);
+		cookie.setUserId(contact.getId());
+		if(cookieService.saveCookie(cookie) != null) {
+			return cookieId;
+		}
+		return null;
 	}
 	
-	public Contact getContactByCookie(UUID cookie) {
-		return userByCookie.get(cookie);
+	public UUID getContactIdByCookieId(UUID cookieId) {
+		return cookieService.getContactIdByCookieId(cookieId);
 	}
 	
 	
