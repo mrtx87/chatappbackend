@@ -16,7 +16,16 @@ public class ChatRoomDTO {
 	String title;
 	String iconUrl;
 	List<UUID> userIds;
+	boolean groupChat;
 
+
+	public boolean isGroupChat() {
+		return groupChat;
+	}
+
+	public void setGroupChat(boolean groupChat) {
+		this.groupChat = groupChat;
+	}
 
 	public ChatRoomDTO() {
 		// TODO Auto-generated constructor stub
