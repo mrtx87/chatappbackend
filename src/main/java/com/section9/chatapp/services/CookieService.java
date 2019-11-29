@@ -19,7 +19,10 @@ public class CookieService {
 	
 	public UUID getContactIdByCookieId(UUID cookieId) {
 		Cookie cookie = cookieRepository.findByCookieId(cookieId);
-		return cookie.getUserId();
+		if(cookie != null && cookie.getUserId() != null) {
+			return cookie.getUserId();
+		}
+		return null;
 	}
 	
 	public List<Cookie> getCookiesByContactId(UUID contactId) {
