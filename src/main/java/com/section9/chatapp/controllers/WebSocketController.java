@@ -23,7 +23,7 @@ public class WebSocketController {
 
 	@MessageMapping("/send/online-status")
 	public void onReceiveOnlineStatusByUser(@Nullable final TransferMessage transferMessage) {
-		//chatService.processOnlineStatusByUser(transferMessage);
+		chatService.finalizeWebSocketConnectionAndLogin(transferMessage.getFrom());
 	}
 	
 

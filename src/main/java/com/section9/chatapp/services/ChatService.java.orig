@@ -55,18 +55,17 @@ public class ChatService {
 	}
 	
 
-	public void finalizeWebSocketConnectionAndLogin(Contact contact) {
+	public void processOnlineStatusByUser(Contact contact) {
 		if (!onlineUsers.exists(contact)) {
 			onlineUsers.add(contact);
-			TransferMessage response = new TransferMessage();
-			response.setFunction(Constants.TM_FUNCTION_LOGIN_AND_COOKIE);
-			response.setFrom(contact);
+			
 			if(!cookieService.hasCookie(contact.getId())) { 
 				UUID cookie = onlineUsers.associateUserByNewCookie(contact);
-				response.setFunction(Constants.TM_FUNCTION_LOGIN_AND_COOKIE);
+				TransferMessage response = new TransferMessage();
+				response.setFunction(Constants.TM_FUNCTION_SET_COOKIE);
 				response.setCookie(cookie);
+				sendMessageToClient(contact.getId(), response);
 			}
-			sendMessageToClient(contact.getId(), response);
 		}
 	}
 
@@ -76,7 +75,7 @@ public class ChatService {
 			user.setName(credentials.getUsername());
 			user.setPassword(credentials.getPassword());
 			user.setKey(UUID.randomUUID().toString());
-			finalizeWebSocketConnectionAndLogin(UserMapper.reduce(user));
+			processOnlineStatusByUser(UserMapper.reduce(user));
 			return Optional.of(UserMapper.map(userService.createUser(user)));
 		}
 
@@ -86,6 +85,7 @@ public class ChatService {
 	public Optional<UserDTO> loginUser(Credentials credentials) {
 		User user = userService.getUserByLogin(credentials);
 		if (user != null) {
+			processOnlineStatusByUser(UserMapper.reduce(user));
 			return Optional.of(UserMapper.map(user));
 		}
 
@@ -94,13 +94,23 @@ public class ChatService {
 
 	public Optional<Contact> loginUserByCookie(Credentials credentials) {
 
+<<<<<<< HEAD
 		UUID loggingInUserId = this.onlineUsers.getContactIdByCookieId(credentials.getCookie());
 			if(loggingInUserId != null) {
 				Contact loggingInUser = this.getContactById(loggingInUserId);
 				return Optional.of(loggingInUser);
 			}
+			
+			return Optional.empty();
+=======
+		Contact loggingInUser = this.onlineUsers.getContactByCookie(credentials.getCookie());
+		if (loggingInUser != null) {
+			this.onlineUsers.add(loggingInUser);
+			return Optional.of(loggingInUser);
+		}
 
 		return Optional.empty();
+>>>>>>> a4c27530c356b646ad3fd4d66f8026bdf4d7253d
 	}
 
 	public Optional<List<Contact>> searchContact(String id, String query) {
