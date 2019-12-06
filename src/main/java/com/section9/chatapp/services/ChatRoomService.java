@@ -28,7 +28,8 @@ public class ChatRoomService {
 	@Autowired
 	ChatRoomRepository chatRoomRepository;
 
-	public ChatRoomService() { }
+	public ChatRoomService() {
+	}
 
 	/*
 	 * Nach createRoom() muss im frontend geöffnet werden. Beteiligte(r) user
@@ -46,9 +47,13 @@ public class ChatRoomService {
 	public Optional<ChatRoom> getRoomById(UUID id) {
 		return chatRoomRepository.findById(id);
 	}
-	
+
 	public void deleteRoomById(UUID roomId) {
 		chatRoomRepository.deleteById(roomId);
+	}
+
+	public void updateChatRoom(ChatRoom chatRoom) {
+		chatRoomRepository.save(chatRoom);
 	}
 
 }

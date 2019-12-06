@@ -21,9 +21,9 @@ public class WebSocketController {
 		this.chatService = chatService;
 	}
 
-	@MessageMapping("/send/online-status")
-	public void onReceiveOnlineStatusByUser(@Nullable final TransferMessage transferMessage) {
-		chatService.finalizeWebSocketConnectionAndLogin(transferMessage.getFrom());
+	@MessageMapping("/send/login-finalization")
+	public void onReceiveLoginFinalization(@Nullable final TransferMessage transferMessage) {
+		chatService.finalizeWebSocketConnectionAndLogin(transferMessage);
 	}
 	
 

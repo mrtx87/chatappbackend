@@ -104,6 +104,16 @@ public class RestController {
 		}
 	}
 	
+	@PostMapping(path = { "/data/update/roomId/{roomId}" })
+	public ResponseEntity<ChatRoomDTO> updateChatRoomProfile(@PathVariable("roomId") UUID roomId, @RequestBody TransferMessage transferMessage) {
+		ChatRoomDTO chatRoomDTO = chatService.updateChatRoomProfile(roomId, transferMessage);
+		if(chatRoomDTO != null) {
+			return ResponseEntity.ok().body(chatRoomDTO);
+		}else {
+			return ResponseEntity.badRequest().build();
+		}
+	}
+	
 	
 	
 	

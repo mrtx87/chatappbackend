@@ -45,29 +45,30 @@ public class ChatService {
 
 	@Autowired
 	OnlineUsers onlineUsers;
-	
+
 	@Autowired
 	CookieService cookieService;
-	
 
 	public ChatService() {
 		onlineUsers = new OnlineUsers();
 	}
-	
 
-	public void finalizeWebSocketConnectionAndLogin(Contact contact) {
-		if (!onlineUsers.exists(contact)) {
-			onlineUsers.add(contact);
-			TransferMessage response = new TransferMessage();
-			response.setFunction(Constants.TM_FUNCTION_LOGIN_AND_COOKIE);
-			response.setFrom(contact);
-			if(!cookieService.hasCookie(contact.getId())) { 
-				UUID cookie = onlineUsers.associateUserByNewCookie(contact);
-				response.setFunction(Constants.TM_FUNCTION_LOGIN_AND_COOKIE);
-				response.setCookie(cookie);
-			}
-			sendMessageToClient(contact.getId(), response);
+	public void finalizeWebSocketConnectionAndLogin(TransferMessage transferMessage) {
+		Contact contact = transferMessage.getFrom();
+		onlineUsers.add(contact);
+		TransferMessage response = new TransferMessage();
+		response.setFunction(Constants.TM_FUNCTION_LOGIN_AND_COOKIE);
+		response.setFrom(contact);
+
+		if (transferMessage.getCookie() == null) {
+			UUID cookie = onlineUsers.associateUserByNewCookie(contact);
+			response.setCookie(cookie);
+		} else {
+			response.setCookie(transferMessage.getCookie());
 		}
+
+		sendMessageToClient(contact.getId(), response);
+
 	}
 
 	public Optional<UserDTO> registerUser(Credentials credentials) {
@@ -76,7 +77,6 @@ public class ChatService {
 			user.setName(credentials.getUsername());
 			user.setPassword(credentials.getPassword());
 			user.setKey(UUID.randomUUID().toString());
-			finalizeWebSocketConnectionAndLogin(UserMapper.reduce(user));
 			return Optional.of(UserMapper.map(userService.createUser(user)));
 		}
 
@@ -95,10 +95,10 @@ public class ChatService {
 	public Optional<Contact> loginUserByCookie(Credentials credentials) {
 
 		UUID loggingInUserId = this.onlineUsers.getContactIdByCookieId(credentials.getCookie());
-			if(loggingInUserId != null) {
-				Contact loggingInUser = this.getContactById(loggingInUserId);
-				return Optional.of(loggingInUser);
-			}
+		if (loggingInUserId != null) {
+			Contact loggingInUser = this.getContactById(loggingInUserId);
+			return Optional.of(loggingInUser);
+		}
 
 		return Optional.empty();
 	}
@@ -317,7 +317,8 @@ public class ChatService {
 		message.setFromId(fromId);
 		message.setBody(body);
 		message.setCreatedAt(Instant.now());
-		message.setNotSeenBy(convertToNotSeenByString(userIds));
+		message.setNotSeenBy(convertToNotSeenByString(
+				userIds.stream().filter(userId -> !fromId.equals(userId)).collect(Collectors.toList())));
 		// message.setNotSeenBy(userIds);
 		return message;
 	}
@@ -349,42 +350,60 @@ public class ChatService {
 	}
 
 	public Contact updateUserProfile(UUID userId, TransferMessage transferMessage) {
+		Optional<User> user_ = userService.getUserById(userId);
 
-		User user = userService.getUserById(userId).get();
-		user.setInfo(transferMessage.getFrom().getInfo());
-		user.setIconUrl(transferMessage.getFrom().getIconUrl());
-		user.setName(transferMessage.getFrom().getName());
-		userService.updateUser(user);
+		if (user_.isPresent()) {
+			User user = user_.get();
+			user.setInfo(transferMessage.getFrom().getInfo());
+			user.setIconUrl(transferMessage.getFrom().getIconUrl());
+			user.setName(transferMessage.getFrom().getName());
+			userService.updateUser(user);
 
-		return UserMapper.reduce(user);
+			return UserMapper.reduce(user);
+		}
+		return null;
 	}
+
+	public ChatRoomDTO updateChatRoomProfile(UUID roomId, TransferMessage transferMessage) {
+
+		Optional<ChatRoom> chatRoom_ = chatRoomService.getRoomById(roomId);
+
+		if (chatRoom_.isPresent()) {
+			ChatRoom chatRoom = chatRoom_.get();
+			chatRoom.setTitle(transferMessage.getChatRoom().getTitle());
+			chatRoom.setIconUrl(transferMessage.getChatRoom().getIconUrl());
+			chatRoomService.updateChatRoom(chatRoom);
+
+			return ChatRoomMapper.map(chatRoom);
+		}
+		return null;	}
 
 	/* DEBUG */
 
 	int countGeneratedUsers = 0;
-	String[] userNamesList = { "default", "HusterHihi", "goran", "ester", "anna" };
+	List<String> userNamesList = List.of("default", "HusterHihi", "goran", "ester", "anna", "sven", "tom", "markus");
 
 	public void createUsers(int numOfUsers) {
-		for (int i = 0; i < numOfUsers && (countGeneratedUsers < userNamesList.length); i++) {
+		int rest = Math.min(numOfUsers, userNamesList.size() - countGeneratedUsers);
+		for (int i = 0; i < rest; i++) {
 			Credentials creds = new Credentials();
 			creds.setPassword("123");
-			creds.setUsername(userNamesList[countGeneratedUsers]);
+			creds.setUsername(userNamesList.get(countGeneratedUsers));
 			registerUser(creds);
 			countGeneratedUsers++;
 		}
 	}
 
 	public String displayGeneratedUsers() {
-		
-		String html = "<table>"
-				+ "<tr><td> Name </td><td> angelegt? </td></tr>";
-		
-		for (int i = 0; i < userNamesList.length; i++) {			
-			String tdName = "<td>" + userNamesList[i] + "</td>";
+
+		String html = "<table>" + "<tr><td> Name </td><td> angelegt? </td></tr>";
+
+		for (int i = 0; i < userNamesList.size(); i++) {
+			String tdName = "<td>" + userNamesList.get(i) + "</td>";
 			String tdStatus = "";
 			if (i + 1 <= countGeneratedUsers) {
 				tdStatus = "<td>" + "ja" + "</td>";
-			}else {
+			} else {
 				tdStatus = "<td>" + "-" + "</td>";
 			}
 			String row = "<tr>" + tdName + tdStatus + "</tr>";
