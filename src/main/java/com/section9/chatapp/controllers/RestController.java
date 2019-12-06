@@ -113,8 +113,7 @@ public class RestController {
 			return ResponseEntity.badRequest().build();
 		}
 	}
-	
-	
+
 	
 	
 	@GetMapping(path = {"/data/userId/{id}/users/{query}"})
@@ -161,14 +160,25 @@ public class RestController {
 	
 	@GetMapping(path = {"/data/userId/{userId}/contacts"})
 	public ResponseEntity<List<Contact>> getContactsByUserId(@PathVariable("userId") UUID userId){
-		List<Contact> contacts = chatService.getContactsByUserId(userId);
+		/*List<Contact> contacts = chatService.getContactsByUserId(userId);
 		if(contacts != null) {
 			return ResponseEntity.ok().body(contacts);
 		}else {
 			return ResponseEntity.ok().body(new ArrayList<Contact>());
+		}*/
+		return getOnlineStatusOfContacts(userId);
+		
+		
+	}
+	
+	@GetMapping(path = { "/data/online/status/contacts/userId/{userId}" })
+	public ResponseEntity<List<Contact>> getOnlineStatusOfContacts(@PathVariable("userId") UUID userId) {
+		List<Contact> contacts = chatService.getContactsWithOnlineStatus(userId);
+		if(contacts != null) {
+			return ResponseEntity.ok().body(contacts);
+		}else {
+			return ResponseEntity.badRequest().build();
 		}
-		
-		
 	}
 	
 	

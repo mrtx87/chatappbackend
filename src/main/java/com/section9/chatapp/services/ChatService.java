@@ -67,7 +67,7 @@ public class ChatService {
 			response.setCookie(transferMessage.getCookie());
 		}
 
-		sendMessageToClient(contact.getId(), response);
+		notifyClient(contact.getId(), response);
 
 	}
 
@@ -129,6 +129,7 @@ public class ChatService {
 			ChatMessage initMessage = buildChatMessage(Constants.SYSTEM_ID, "New chat room created.",
 					chatRoomDTO.getId(), chatRoomDTO.getUserIds());
 			chatMessageService.saveChatMessage(initMessage);
+			
 			if (!chatRoom.isGroupChat()) {
 				Optional<User> user1 = userService.getUserById(chatRoom.getUserIds().get(0));
 				Optional<User> user2 = userService.getUserById(chatRoom.getUserIds().get(1));
@@ -139,16 +140,31 @@ public class ChatService {
 					user2.get().getChatRooms().add(chatRoom.getId());
 					userService.updateUser(user1.get());
 					userService.updateUser(user2.get());
+					
+					TransferMessage response = new TransferMessage();
+					response.setFrom(transferMessage.getFrom());
+					response.setChatroom(chatRoomDTO);
+					response.setFunction(Constants.TM_FUNCTION_CREATE_ROOM_AND_CONTACT);
+					notifyUserIfOnline(user1.get().getId(), response);
+					notifyUserIfOnline(user2.get().getId(), response);
 				}
 			} else {
+				TransferMessage response = new TransferMessage();
+				response.setFrom(transferMessage.getFrom());
+				response.setChatroom(chatRoomDTO);
+				response.setFunction(Constants.TM_FUNCTION_CREATE_GROUP_ROOM);
 				for (UUID userId : chatRoom.getUserIds()) {
 					Optional<User> user = userService.getUserById(userId);
 					if (user.isPresent()) {
 						user.get().getChatRooms().add(chatRoom.getId());
 						userService.updateUser(user.get());
+						notifyUserIfOnline(user.get().getId(), response);
 					}
 				}
+				
 			}
+			
+			
 
 			return Optional.of(chatRoomDTO);
 		}
@@ -181,7 +197,7 @@ public class ChatService {
 
 	private void notifyUserIfOnline(UUID userId, TransferMessage transferMessage) {
 		if (isOnline(userId)) {
-			sendMessageToClient(userId, transferMessage);
+			notifyClient(userId, transferMessage);
 		}
 	}
 
@@ -278,7 +294,7 @@ public class ChatService {
 			response.setChatMessage(chatMessageToBeShared.get());
 
 			transferMessage.getChatRoom().getUserIds().stream().filter(userId -> onlineUsers.exists(userId))
-					.forEach(userId -> sendMessageToClient(userId, response));
+					.forEach(userId -> notifyClient(userId, response));
 		}
 	}
 
@@ -294,8 +310,14 @@ public class ChatService {
 		return true;
 	}
 
-	private void sendMessageToClient(UUID userId, TransferMessage response) {
+	private void notifyClient(UUID userId, TransferMessage response) {
 		this.messagingService.convertAndSend("/client/" + userId, response);
+	}
+	
+	private void notifyClientsIfOnline(List<UUID> userIds, TransferMessage response) {
+		for(UUID id : userIds) {
+			notifyUserIfOnline(id, response);
+		}
 	}
 
 	private String convertToNotSeenByString(List<UUID> ids) {
@@ -376,7 +398,8 @@ public class ChatService {
 
 			return ChatRoomMapper.map(chatRoom);
 		}
-		return null;	}
+		return null;
+	}
 
 	/* DEBUG */
 
@@ -411,6 +434,18 @@ public class ChatService {
 		}
 
 		return html + "</table>";
+	}
+
+	public List<Contact> getContactsWithOnlineStatus(UUID userId) {
+		List<Contact> contacts = getContactsByUserId(userId);
+		contacts.forEach(contact -> {
+			if (onlineUsers.exists(contact.getId())) {
+				contact.setOnline(true);
+			} else {
+				contact.setOnline(false);
+			}
+		});
+		return contacts;
 	}
 
 }

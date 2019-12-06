@@ -8,6 +8,7 @@ public class Contact {
 	private String name;
 	private String iconUrl;
 	private String info;
+	private boolean online;
 	
 	public UUID getId() {
 		return id;
@@ -34,4 +35,11 @@ public class Contact {
 	public void setInfo(String info) {
 		this.info = info;
 	}
+	public boolean isOnline() {
+		return online;
+	}
+	public void setOnline(boolean online) {
+		this.online = online;
+	}
+	
 }
