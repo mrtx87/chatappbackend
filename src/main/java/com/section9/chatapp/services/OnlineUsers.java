@@ -48,16 +48,16 @@ public class OnlineUsers {
 		return cache.remove(id);
 	}
 	
-	public boolean exists(UUID id) {
+	public boolean isOnline(UUID id) {
 		return cache.containsKey(id);
 	}
 	
-	public boolean exists(Contact contact) {
-		return exists(contact.getId());
+	public boolean isOnline(Contact contact) {
+		return isOnline(contact.getId());
 	}
 	
-	public boolean exists(User user) {
-		return exists(UserMapper.reduce(user));
+	public boolean isOnline(User user) {
+		return isOnline(user.getId());
 	}
 	
 	public UUID associateUserByNewCookie(Contact contact) {

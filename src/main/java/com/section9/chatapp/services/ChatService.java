@@ -246,7 +246,7 @@ public class ChatService {
 	}
 
 	public Boolean isOnline(UUID userId) {
-		return onlineUsers.exists(userId);
+		return onlineUsers.isOnline(userId);
 	}
 
 //	private List<UUID> getOtherUsers(List<UUID> userList, UUID userId) {
@@ -293,7 +293,7 @@ public class ChatService {
 			response.setFunction("chat-message");
 			response.setChatMessage(chatMessageToBeShared.get());
 
-			transferMessage.getChatRoom().getUserIds().stream().filter(userId -> onlineUsers.exists(userId))
+			transferMessage.getChatRoom().getUserIds().stream().filter(userId -> onlineUsers.isOnline(userId))
 					.forEach(userId -> notifyClient(userId, response));
 		}
 	}
@@ -439,7 +439,7 @@ public class ChatService {
 	public List<Contact> getContactsWithOnlineStatus(UUID userId) {
 		List<Contact> contacts = getContactsByUserId(userId);
 		contacts.forEach(contact -> {
-			if (onlineUsers.exists(contact.getId())) {
+			if (onlineUsers.isOnline(contact.getId())) {
 				contact.setOnline(true);
 			} else {
 				contact.setOnline(false);
