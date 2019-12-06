@@ -20,19 +20,19 @@ public class OnlineUsers {
 	
 	
 	
-	Map<UUID, Contact> cache;
+	Map<UUID, Contact> ONLINE_USERS;
 	Map<UUID, Contact> userByCookie;
 
 	public Map<UUID, Contact> getCache() {
-		return cache;
+		return ONLINE_USERS;
 	}
 
 	public void setCache(Map<UUID, Contact> cache) {
-		this.cache = cache;
+		this.ONLINE_USERS = cache;
 	}
 	
 	public OnlineUsers() {
-		cache = new HashMap<>();
+		ONLINE_USERS = new HashMap<>();
 		userByCookie = new HashMap<>();
 	}
 	
@@ -41,15 +41,15 @@ public class OnlineUsers {
 	}
 	
 	public Contact add(Contact user) {
-		return cache.put(user.getId(), user);
+		return ONLINE_USERS.put(user.getId(), user);
 	}
 	
 	public Contact delete(UUID id) {
-		return cache.remove(id);
+		return ONLINE_USERS.remove(id);
 	}
 	
 	public boolean isOnline(UUID id) {
-		return cache.containsKey(id);
+		return ONLINE_USERS.containsKey(id);
 	}
 	
 	public boolean isOnline(Contact contact) {
