@@ -78,6 +78,8 @@ public class ChatService {
 			user.setName(credentials.getUsername());
 			user.setPassword(credentials.getPassword());
 			user.setKey(UUID.randomUUID().toString());
+			user.setChatRooms(new ArrayList<>());
+			user.setContacts(new ArrayList<>());
 			return Optional.of(UserMapper.map(userService.createUser(user)));
 		}
 
@@ -117,15 +119,14 @@ public class ChatService {
 
 	public Page<ChatMessageDTO> getChatMessagesByRoomId(UUID userId, UUID roomId, int page) {
 		Page<ChatMessage> resultPage = chatMessageService.getChatMessagesByRoomId(roomId, page, 25);
-		
-		return resultPage.map(chatMessage -> { 
 
-				ChatMessageDTO chatMessageDTO = ChatMessageMapper.map(chatMessage);
-				chatMessageDTO.setSeen(hasSeenChatMessage(userId, chatMessageDTO));
-			
+		return resultPage.map(chatMessage -> {
+			ChatMessageDTO chatMessageDTO = ChatMessageMapper.map(chatMessage);
+			chatMessageDTO.setSeen(hasSeenChatMessage(userId, chatMessageDTO));
+
 			return chatMessageDTO;
 		});
-		//return null;
+		// return null;
 
 	}
 
