@@ -1,5 +1,6 @@
 package com.section9.chatapp.controllers;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +25,7 @@ import com.section9.chatapp.services.ChatMessageService;
 import com.section9.chatapp.services.ChatService;
 
 @org.springframework.web.bind.annotation.RestController
-@CrossOrigin(origins = { "http://localhost:4200", "https://localhost:4200" })
+@CrossOrigin(origins = {"http://localhost",  "http://localhost:4200", "https://localhost:4200" })
 public class RestController {
 
 	@Autowired
@@ -136,16 +137,29 @@ public class RestController {
 
 	}
 
-	@GetMapping(path = { "/data/userId/{userId}/roomId/{roomId}/page/{page}" })
-	public ResponseEntity<Page<ChatMessageDTO>> getChatMessagesByRoomId(@PathVariable("userId") UUID userId,
-			@PathVariable("roomId") UUID roomId, @PathVariable("page") String page) {
-		Page<ChatMessageDTO> chatMessages = chatService.getChatMessagesByRoomId(userId, roomId, Integer.valueOf(page));
+	@GetMapping(path = { "/data/inital-messages/userId/{userId}/roomId/{roomId}" })
+	public ResponseEntity<List<ChatMessageDTO>> getInitialChatMessagesByRoomId(@PathVariable("userId") UUID userId,
+			@PathVariable("roomId") UUID roomId) {
+		List<ChatMessageDTO> chatMessages = chatService.getInitialChatMessages(userId, roomId);
 		if (chatMessages != null) {
 			return ResponseEntity.ok().body(chatMessages);
 		} else {
-			return ResponseEntity.ok().body(Page.empty());
+			return ResponseEntity.ok().build();
 		}
 	}
+	
+	@GetMapping(path = { "/data/userId/{userId}/roomId/{roomId}/token/{lastMessageToken}" })
+	public ResponseEntity<List<ChatMessageDTO>> getChatMessagesBatchByRoomId(@PathVariable("userId") UUID userId,
+			@PathVariable("roomId") UUID roomId, @PathVariable("lastMessageToken") UUID lastMessageToken) {
+		List<ChatMessageDTO> chatMessages = chatService.getChatMessagesBatch(userId, roomId, lastMessageToken);
+		if (chatMessages != null) {
+			return ResponseEntity.ok().body(chatMessages);
+		} else {
+			return ResponseEntity.ok().build();
+		}
+	}
+	
+	
 
 	@GetMapping(path = { "/data/contactId/{contactId}" })
 	public ResponseEntity<Contact> getContactById(@PathVariable("contactId") UUID contactId) {

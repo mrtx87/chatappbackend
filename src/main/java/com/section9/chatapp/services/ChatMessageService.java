@@ -1,6 +1,7 @@
 package com.section9.chatapp.services;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,7 +21,7 @@ public class ChatMessageService {
 	@Autowired
 	ChatMessageRepository chatMessageRepository;
 	
-	public ChatMessageService() {
+	public ChatMessageService() {	
 	}
 
 	public Optional<ChatMessage> saveChatMessage(ChatMessage message) {
@@ -32,12 +33,14 @@ public class ChatMessageService {
 		return chatMessageRepository.getOne(chatMessageId);
 	}
 	
-	public Page<ChatMessage> getChatMessagesByRoomId(UUID roomId, int page, int size){
-		Pageable pageable = PageRequest.of(page, size);
-
-		Page<ChatMessage> messages = chatMessageRepository.findByRoomId(roomId, pageable);
-		//return chatMessageRepository.getChatMessagesByRoomId(roomId, 100);
-		return messages;
+	public List<ChatMessage> getAllChatMessagesDesc(UUID roomId){
+		//Page<ChatMessage> messages = chatMessageRepository.findByRoomId(roomId, );
+		return chatMessageRepository.getAllChatMessagesDesc(roomId);
+	}
+	
+	public List<ChatMessage> getAllChatMessagesAsc(UUID roomId){
+		//Page<ChatMessage> messages = chatMessageRepository.findByRoomId(roomId, );
+		return chatMessageRepository.getAllChatMessagesAsc(roomId);
 	}
 	
 	private void removeMessageById(UUID messageId) {
@@ -48,10 +51,8 @@ public class ChatMessageService {
 		chatMessageRepository.delete(message);
 	}
 	
-	
-	
 	public void removeChatMessagesByRoomId(UUID roomId) {
-		List<ChatMessage> messagesOfRoom = chatMessageRepository.getAllChatMessagesByRoomId(roomId);
+		List<ChatMessage> messagesOfRoom = chatMessageRepository.getAllChatMessagesAsc(roomId);
 		messagesOfRoom.stream().forEach(m -> removeMessage(m));
 	}
 	

@@ -118,24 +118,59 @@ public class ChatService {
 						.map(UserMapper::reduce).collect(Collectors.toList()));
 	}
 
-	public Page<ChatMessageDTO> getChatMessagesByRoomId(UUID userId, UUID roomId, int page) {
-		Page<ChatMessage> resultPage = chatMessageService.getChatMessagesByRoomId(roomId, page, 25);
-
-		return resultPage.map(chatMessage -> {
+	public List<ChatMessageDTO> getInitialChatMessages(UUID userId, UUID roomId) {
+		List<ChatMessage> allChatMessages = chatMessageService.getAllChatMessagesDesc(roomId);
+		List<ChatMessageDTO> initMessages = new ArrayList<>();
+		int additionalMessagesCounter = 20; // TODO in constants?
+		for (ChatMessage chatMessage : allChatMessages) {
 			ChatMessageDTO chatMessageDTO = ChatMessageMapper.map(chatMessage);
-			chatMessageDTO.setSeen(hasSeenChatMessage(userId, chatMessageDTO));
+			if (hasSeenChatMessage(userId, chatMessageDTO)) {
+				chatMessageDTO.setSeen(true);
+				additionalMessagesCounter -= 1;
+			} else {
+				chatMessageDTO.setSeen(false);
+			}
 
-			return chatMessageDTO;
-		});
+			initMessages.add(0, chatMessageDTO);
+			if (additionalMessagesCounter == 0) {
+				break;
+			}
+		}
+		return initMessages;
+
 		// return null;
 
+	}
+
+	public List<ChatMessageDTO> getChatMessagesBatch(UUID userId, UUID roomId, UUID lastMessageToken) {
+
+		List<ChatMessage> allChatMessages = chatMessageService.getAllChatMessagesDesc(roomId);
+		List<ChatMessageDTO> batchOfMessages = new ArrayList<>();
+		int messageCounter = 5;
+		boolean found = false;
+		for(ChatMessage message : allChatMessages) {		
+			if(found) {
+				batchOfMessages.add(0, ChatMessageMapper.map(message));
+				messageCounter -= 1;
+				if(messageCounter == 0) {
+					break;
+				}
+				continue;
+			}
+			
+			if(!found && message.getId().equals(lastMessageToken)){
+				found = true;
+			}
+		}
+		
+		return batchOfMessages;
 	}
 
 	public Optional<ChatRoomDTO> createRoom(TransferMessage transferMessage) {
 		ChatRoom chatRoom = chatRoomService.createRoom(transferMessage);
 		if (chatRoom != null) {
 			ChatRoomDTO chatRoomDTO = ChatRoomMapper.map(chatRoom);
-			ChatMessage initMessage = buildChatMessage(Constants.SYSTEM_ID, "New chat room created.",
+			ChatMessage initMessage = buildChatMessage(Constants.SYSTEM_INIT_ID, "New chat room created.",
 					chatRoomDTO.getId(), chatRoomDTO.getUserIds());
 			chatMessageService.saveChatMessage(initMessage);
 
@@ -412,16 +447,17 @@ public class ChatService {
 
 	int countGeneratedUsers = 0;
 	List<String> userNamesList;
-	private static  List<String> toList() {
-		String[] userNamesArr = {"default", "HusterHihi", "goran", "ester", "anna", "sven", "tom", "markus"};
 
-		List <String> temp = new ArrayList<String>();
-		for(int i = 0; i < userNamesArr.length; i++) {
+	private static List<String> toList() {
+		String[] userNamesArr = { "default", "HusterHihi", "goran", "ester", "anna", "sven", "tom", "markus" };
+
+		List<String> temp = new ArrayList<String>();
+		for (int i = 0; i < userNamesArr.length; i++) {
 			temp.add(userNamesArr[i]);
 		}
 		return temp;
 	}
-	
+
 	public void createUsers(int numOfUsers) {
 		int rest = Math.min(numOfUsers, userNamesList.size() - countGeneratedUsers);
 		for (int i = 0; i < rest; i++) {
