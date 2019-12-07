@@ -8,6 +8,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -114,12 +115,18 @@ public class ChatService {
 						.map(UserMapper::reduce).collect(Collectors.toList()));
 	}
 
-	public List<ChatMessageDTO> getChatMessagesByRoomId(UUID userId, UUID roomId) {
-		return chatMessageService.getChatMessagesByRoomId(roomId).stream().map(chatMessage -> {
-			ChatMessageDTO chatMessageDTO = ChatMessageMapper.map(chatMessage);
-			chatMessageDTO.setSeen(hasSeenChatMessage(userId, chatMessageDTO));
+	public Page<ChatMessageDTO> getChatMessagesByRoomId(UUID userId, UUID roomId, int page) {
+		Page<ChatMessage> resultPage = chatMessageService.getChatMessagesByRoomId(roomId, page, 25);
+		
+		return resultPage.map(chatMessage -> { 
+
+				ChatMessageDTO chatMessageDTO = ChatMessageMapper.map(chatMessage);
+				chatMessageDTO.setSeen(hasSeenChatMessage(userId, chatMessageDTO));
+			
 			return chatMessageDTO;
-		}).collect(Collectors.toList());
+		});
+		//return null;
+
 	}
 
 	public Optional<ChatRoomDTO> createRoom(TransferMessage transferMessage) {
@@ -129,7 +136,7 @@ public class ChatService {
 			ChatMessage initMessage = buildChatMessage(Constants.SYSTEM_ID, "New chat room created.",
 					chatRoomDTO.getId(), chatRoomDTO.getUserIds());
 			chatMessageService.saveChatMessage(initMessage);
-			
+
 			if (!chatRoom.isGroupChat()) {
 				Optional<User> user1 = userService.getUserById(chatRoom.getUserIds().get(0));
 				Optional<User> user2 = userService.getUserById(chatRoom.getUserIds().get(1));
@@ -140,7 +147,7 @@ public class ChatService {
 					user2.get().getChatRooms().add(chatRoom.getId());
 					userService.updateUser(user1.get());
 					userService.updateUser(user2.get());
-					
+
 					TransferMessage response = new TransferMessage();
 					response.setFrom(transferMessage.getFrom());
 					response.setChatroom(chatRoomDTO);
@@ -161,10 +168,8 @@ public class ChatService {
 						notifyUserIfOnline(user.get().getId(), response);
 					}
 				}
-				
+
 			}
-			
-			
 
 			return Optional.of(chatRoomDTO);
 		}
@@ -313,9 +318,9 @@ public class ChatService {
 	private void notifyClient(UUID userId, TransferMessage response) {
 		this.messagingService.convertAndSend("/client/" + userId, response);
 	}
-	
+
 	private void notifyClientsIfOnline(List<UUID> userIds, TransferMessage response) {
-		for(UUID id : userIds) {
+		for (UUID id : userIds) {
 			notifyUserIfOnline(id, response);
 		}
 	}

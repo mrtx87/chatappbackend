@@ -6,6 +6,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.section9.chatapp.entities.ChatMessage;
@@ -29,8 +32,12 @@ public class ChatMessageService {
 		return chatMessageRepository.getOne(chatMessageId);
 	}
 	
-	public List<ChatMessage> getChatMessagesByRoomId(UUID roomId){
-		return chatMessageRepository.getChatMessagesByRoomId(roomId, 100);
+	public Page<ChatMessage> getChatMessagesByRoomId(UUID roomId, int page, int size){
+		Pageable pageable = PageRequest.of(page, size);
+
+		Page<ChatMessage> messages = chatMessageRepository.findByRoomId(roomId, pageable);
+		//return chatMessageRepository.getChatMessagesByRoomId(roomId, 100);
+		return messages;
 	}
 	
 	private void removeMessageById(UUID messageId) {

@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -137,13 +138,13 @@ public class RestController {
 	
 	}
 	
-	@GetMapping(path = {"/data/userId/{userId}/roomId/{roomId}"})
-	public ResponseEntity<List<ChatMessageDTO>> getChatMessagesByRoomId(@PathVariable("userId") UUID userId, @PathVariable("roomId") UUID roomId){
-		List<ChatMessageDTO> chatMessages = chatService.getChatMessagesByRoomId(userId, roomId);
+	@GetMapping(path = {"/data/userId/{userId}/roomId/{roomId}/page/{page}"})
+	public ResponseEntity<Page<ChatMessageDTO>> getChatMessagesByRoomId(@PathVariable("userId") UUID userId, @PathVariable("roomId") UUID roomId, @PathVariable("page") String page){
+		Page<ChatMessageDTO> chatMessages = chatService.getChatMessagesByRoomId(userId, roomId, Integer.valueOf(page));
 		if(chatMessages != null) {
 			return ResponseEntity.ok().body(chatMessages);
 		}else {
-			return ResponseEntity.ok().body(new ArrayList<ChatMessageDTO>());
+			return ResponseEntity.ok().body(Page.empty());
 		}
 	}
 	
