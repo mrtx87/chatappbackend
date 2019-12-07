@@ -51,6 +51,7 @@ public class ChatService {
 
 	public ChatService() {
 		onlineUsers = new OnlineUsers();
+		userNamesList = toList();
 	}
 
 	public void finalizeWebSocketConnectionAndLogin(TransferMessage transferMessage) {
@@ -404,8 +405,17 @@ public class ChatService {
 	/* DEBUG */
 
 	int countGeneratedUsers = 0;
-	List<String> userNamesList = List.of("default", "HusterHihi", "goran", "ester", "anna", "sven", "tom", "markus");
+	List<String> userNamesList;
+	private static  List<String> toList() {
+		String[] userNamesArr = {"default", "HusterHihi", "goran", "ester", "anna", "sven", "tom", "markus"};
 
+		List <String> temp = new ArrayList<String>();
+		for(int i = 0; i < userNamesArr.length; i++) {
+			temp.add(userNamesArr[i]);
+		}
+		return temp;
+	}
+	
 	public void createUsers(int numOfUsers) {
 		int rest = Math.min(numOfUsers, userNamesList.size() - countGeneratedUsers);
 		for (int i = 0; i < rest; i++) {
