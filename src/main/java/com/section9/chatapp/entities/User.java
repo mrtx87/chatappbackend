@@ -36,9 +36,11 @@ public class User {
 	@Nullable
 	private String info;
 
+	@NotNull
 	@ElementCollection
 	List<UUID> contacts;
 
+	@NotNull
 	@ElementCollection
 	List<UUID> chatRooms;
 

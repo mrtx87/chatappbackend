@@ -63,15 +63,15 @@ public class RestController {
 	
 	
 	
-	@PostMapping(path = {"/data/create-room"})
-	public ResponseEntity<ChatRoomDTO> createRoom(@RequestBody TransferMessage transferMessage) {
-		Optional<ChatRoomDTO> chatRoomDTO = chatService.createRoom(transferMessage);
-		if(chatRoomDTO.isPresent()) {
-			return ResponseEntity.ok().body(chatRoomDTO.get());
-		}else {
-			return ResponseEntity.badRequest().build();
-		}
-	}
+//	@PostMapping(path = {"/data/create-room"})
+//	public ResponseEntity<ChatRoomDTO> createRoom(@RequestBody TransferMessage transferMessage) {
+//		Optional<ChatRoomDTO> chatRoomDTO = chatService.createRoom(transferMessage);
+//		if(chatRoomDTO.isPresent()) {
+//			return ResponseEntity.ok().body(chatRoomDTO.get());
+//		}else {
+//			return ResponseEntity.badRequest().build();
+//		}
+//	}
 	
 	@PostMapping(path = { "/data/remove-contact" })
 	public ResponseEntity<Object> removeContact(@RequestBody TransferMessage transferMessage) {
