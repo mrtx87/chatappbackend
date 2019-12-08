@@ -121,18 +121,18 @@ public class ChatService {
 	public List<ChatMessageDTO> getInitialChatMessages(UUID userId, UUID roomId) {
 		List<ChatMessage> allChatMessages = chatMessageService.getAllChatMessagesDesc(roomId);
 		List<ChatMessageDTO> initMessages = new ArrayList<>();
-		int additionalMessagesCounter = 20; // TODO in constants?
+		int additionalMessagesCount = Constants.ADDITIONAL_MESSAGES_SIZE; // TODO in constants?
 		for (ChatMessage chatMessage : allChatMessages) {
 			ChatMessageDTO chatMessageDTO = ChatMessageMapper.map(chatMessage);
 			if (hasSeenChatMessage(userId, chatMessageDTO)) {
 				chatMessageDTO.setSeen(true);
-				additionalMessagesCounter -= 1;
+				additionalMessagesCount -= 1;
 			} else {
 				chatMessageDTO.setSeen(false);
 			}
 
 			initMessages.add(0, chatMessageDTO);
-			if (additionalMessagesCounter == 0) {
+			if (additionalMessagesCount == 0) {
 				break;
 			}
 		}
@@ -146,13 +146,13 @@ public class ChatService {
 
 		List<ChatMessage> allChatMessages = chatMessageService.getAllChatMessagesDesc(roomId);
 		List<ChatMessageDTO> batchOfMessages = new ArrayList<>();
-		int messageCounter = 5;
+		int batchSize = Constants.MESSAGE_BATCH_SIZE;
 		boolean found = false;
 		for(ChatMessage message : allChatMessages) {		
 			if(found) {
 				batchOfMessages.add(0, ChatMessageMapper.map(message));
-				messageCounter -= 1;
-				if(messageCounter == 0) {
+				batchSize -= 1;
+				if(batchSize == 0) {
 					break;
 				}
 				continue;
