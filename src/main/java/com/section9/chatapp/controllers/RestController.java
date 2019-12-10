@@ -134,7 +134,16 @@ public class RestController {
 		} else {
 			return ResponseEntity.ok().body(new ArrayList<ChatRoomDTO>());
 		}
-
+	}
+	
+	@GetMapping(path = { "/leave-room/roomId/{roomId}/userId/{userId}" })
+	public ResponseEntity<ChatRoomDTO> leaveGroupRoom(@PathVariable("roomId") UUID roomId,@PathVariable("userId") UUID userId) {
+		Optional<ChatRoomDTO> room = chatService.leaveGroupRoom(roomId, userId);
+		if (room.isPresent()) {
+			return ResponseEntity.ok().body(room.get());
+		} else {
+			return ResponseEntity.badRequest().build();
+		}
 	}
 
 	@GetMapping(path = { "/data/inital-messages/userId/{userId}/roomId/{roomId}" })

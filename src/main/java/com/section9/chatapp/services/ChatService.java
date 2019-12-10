@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -499,6 +500,29 @@ public class ChatService {
 			}
 		});
 		return contacts;
+	}
+
+	public Optional<ChatRoomDTO> leaveGroupRoom(UUID roomId, UUID userId) {
+		Optional<ChatRoom> room = chatRoomService.getRoomById(roomId);
+		if(room.isPresent()) {
+			room.get().getUserIds().remove(userId);
+			Optional<User> user = userService.getUserById(userId);
+			if(user.isPresent()) {
+				user.get().getChatRooms().remove(roomId);
+				ChatMessage rawMessage = new ChatMessage();
+				rawMessage.setFromId(Constants.SYSTEM_ID);
+				rawMessage.setBody(user.get().getName()+" user left the room.");
+				rawMessage.setCreatedAt(Instant.now());
+				rawMessage.setRoomId(roomId);
+				Optional<ChatMessage> message = chatMessageService.saveChatMessage(rawMessage);
+				TransferMessage transferMessage = new TransferMessage();
+				transferMessage.setFrom(UserMapper.reduce(user.get()));
+				transferMessage.setChatMessage(ChatMessageMapper.map(message.get()));
+				notifyClientsIfOnline(room.get().getUserIds(), transferMessage);
+				return room.map(ChatRoomMapper::map);
+			}
+		}
+		return Optional.empty();
 	}
 
 }
