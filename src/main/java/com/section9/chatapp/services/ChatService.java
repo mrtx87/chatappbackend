@@ -41,6 +41,7 @@ public class ChatService {
 	@Autowired
 	ChatMessageService chatMessageService;
 
+	
 	@Autowired
 	SimpMessagingTemplate messagingService;
 
