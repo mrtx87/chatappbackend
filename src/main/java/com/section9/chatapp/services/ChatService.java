@@ -172,11 +172,11 @@ public class ChatService {
 		if (chatRoom != null) {
 			ChatRoomDTO chatRoomDTO = ChatRoomMapper.map(chatRoom);
 			ChatMessage initDateMessage = buildChatMessage(Constants.CHAT_MESSAGE_DATE_TYPE, Instant.now().truncatedTo(ChronoUnit.DAYS).toString(),
-					chatRoomDTO.getId(), chatRoomDTO.getUserIds());
+					chatRoomDTO.getId(), chatRoomDTO.getUserIds(), true);
 			chatMessageService.saveChatMessage(initDateMessage);
 			
 			ChatMessage initMessage = buildChatMessage(Constants.SYSTEM_INIT_ID, "New chat room created.",
-					chatRoomDTO.getId(), chatRoomDTO.getUserIds());
+					chatRoomDTO.getId(), chatRoomDTO.getUserIds(), true);
 			chatMessageService.saveChatMessage(initMessage);
 
 			if (!chatRoom.isGroupChat()) {
@@ -337,30 +337,29 @@ public class ChatService {
 	
 
 	public void processChatMessageFromUser(DataTransferContainer transferMessage) {
+		ChatMessageDTO receivedMessage = transferMessage.getChatMessage();
 		
-		ChatRoomDTO receivedChatRoom = transferMessage.getChatRoom();
-		
-		ChatMessageDTO latestChatMessage = getLatestChatMessageByRoomId(receivedChatRoom.getId());
+		ChatMessageDTO latestChatMessage = getLatestChatMessageByRoomId(receivedMessage.getRoomId());
 		Instant latestChatMessageDay = latestChatMessage.getCreatedAt().truncatedTo(ChronoUnit.DAYS);
 		Instant today = Instant.now().truncatedTo(ChronoUnit.DAYS);
 
 		List<ChatMessageDTO> chatMessages = new ArrayList<ChatMessageDTO>();
 		if(latestChatMessageDay.isBefore(today)) {
-			ChatMessage dateMessage = buildChatMessage(Constants.CHAT_MESSAGE_DATE_TYPE, Instant.now().truncatedTo(ChronoUnit.DAYS).toString() ,transferMessage.getChatRoom().getId(), transferMessage.getChatRoom().getUserIds());
+			ChatMessage dateMessage = buildChatMessage(Constants.CHAT_MESSAGE_DATE_TYPE, Instant.now().truncatedTo(ChronoUnit.DAYS).toString() , receivedMessage.getRoomId(), transferMessage.getUnseenChatMessageIds(), true);
 			this.chatMessageService.saveChatMessage(dateMessage);
 			chatMessages.add(ChatMessageMapper.map(dateMessage));
 		}
 
 		Optional<ChatMessageDTO> chatMessageToBeShared = this.chatMessageService
-				.saveChatMessage(buildChatMessage(transferMessage)).map(ChatMessageMapper::map);
+				.saveChatMessage(buildChatMessage(receivedMessage.getFromId(), receivedMessage.getBody(),receivedMessage.getRoomId(), transferMessage.getUnseenChatMessageIds(), false)).map(ChatMessageMapper::map);
 		if (chatMessageToBeShared.isPresent()) {
 			DataTransferContainer response = new DataTransferContainer();
 			response.setFunction("chat-message");
-			response.setChatRoomId(receivedChatRoom.getId());
+			response.setChatRoomId(receivedMessage.getRoomId());
 			chatMessages.add(chatMessageToBeShared.get());
 			response.setChatMessages(chatMessages);
 
-			transferMessage.getChatRoom().getUserIds().stream().filter(userId -> onlineUsers.isOnline(userId))
+			transferMessage.getUnseenChatMessageIds().stream().filter(userId -> onlineUsers.isOnline(userId))
 					.forEach(userId -> notifyClient(userId, response));
 		}
 	}
@@ -400,9 +399,9 @@ public class ChatService {
 		return notSeenBy;
 	}
 
-	private ChatMessage buildChatMessage(String fromId, String body, UUID chatRoomId, List<UUID> userIds) {
+	private ChatMessage buildChatMessage(String fromId, String body, UUID chatRoomId, List<UUID> userIds, boolean randomizeId) {
 		ChatMessage message = new ChatMessage();
-		message.setFromId(fromId + Instant.now().toEpochMilli());
+		message.setFromId(randomizeId ? fromId + Instant.now().toEpochMilli() : fromId);
 		message.setRoomId(chatRoomId);
 		message.setBody(body);
 		message.setCreatedAt(Instant.now());
@@ -410,16 +409,6 @@ public class ChatService {
 				userIds.stream().filter(userId -> !fromId.equals(userId)).collect(Collectors.toList())));
 		// message.setNotSeenBy(userIds);
 		return message;
-	}
-
-	private ChatMessage buildChatMessage(DataTransferContainer transferMessage) {
-
-		return buildChatMessage(
-				transferMessage.getChatMessage().getFromId(),
-				transferMessage.getChatMessage().getBody(),
-				transferMessage.getChatRoom().getId(),
-				transferMessage.getChatRoom().getUserIds()
-				);
 	}
 
 	public void processDisconnectFromClient(DataTransferContainer transferMessage) {
