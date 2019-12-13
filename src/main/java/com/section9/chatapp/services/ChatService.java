@@ -171,10 +171,11 @@ public class ChatService {
 		ChatRoom chatRoom = chatRoomService.createRoom(transferMessage);
 		if (chatRoom != null) {
 			ChatRoomDTO chatRoomDTO = ChatRoomMapper.map(chatRoom);
-			ChatMessage initDateMessage = buildChatMessage(Constants.CHAT_MESSAGE_DATE_TYPE, Instant.now().truncatedTo(ChronoUnit.DAYS).toString(),
-					chatRoomDTO.getId(), chatRoomDTO.getUserIds(), true);
+			ChatMessage initDateMessage = buildChatMessage(Constants.CHAT_MESSAGE_DATE_TYPE,
+					Instant.now().truncatedTo(ChronoUnit.DAYS).toString(), chatRoomDTO.getId(),
+					chatRoomDTO.getUserIds(), true);
 			chatMessageService.saveChatMessage(initDateMessage);
-			
+
 			ChatMessage initMessage = buildChatMessage(Constants.SYSTEM_INIT_ID, "New chat room created.",
 					chatRoomDTO.getId(), chatRoomDTO.getUserIds(), true);
 			chatMessageService.saveChatMessage(initMessage);
@@ -334,30 +335,38 @@ public class ChatService {
 	public ChatMessageDTO getLatestChatMessageByRoomId(UUID roomId) {
 		return chatMessageService.getLatestChatMessageByRoomId(roomId);
 	}
-	
 
-	public void processChatMessageFromUser(DataTransferContainer transferMessage) {
-		ChatMessageDTO receivedMessage = transferMessage.getChatMessage();
-		
-		ChatMessageDTO latestChatMessage = getLatestChatMessageByRoomId(receivedMessage.getRoomId());
+	private void insertDateMessageIfNeeded(DataTransferContainer dtc, List<ChatMessageDTO> store) {
+		ChatMessageDTO latestChatMessage = getLatestChatMessageByRoomId(dtc.getChatMessage().getRoomId());
 		Instant latestChatMessageDay = latestChatMessage.getCreatedAt().truncatedTo(ChronoUnit.DAYS);
 		Instant today = Instant.now().truncatedTo(ChronoUnit.DAYS);
 
-		List<ChatMessageDTO> chatMessages = new ArrayList<ChatMessageDTO>();
-		if(latestChatMessageDay.isBefore(today)) {
-			ChatMessage dateMessage = buildChatMessage(Constants.CHAT_MESSAGE_DATE_TYPE, Instant.now().truncatedTo(ChronoUnit.DAYS).toString() , receivedMessage.getRoomId(), transferMessage.getUnseenChatMessageIds(), true);
+		if (latestChatMessageDay.isBefore(today)) {
+			ChatMessage dateMessage = buildChatMessage(Constants.CHAT_MESSAGE_DATE_TYPE,
+					Instant.now().truncatedTo(ChronoUnit.DAYS).toString(), dtc.getChatMessage().getRoomId(),
+					dtc.getUnseenChatMessageIds(), true);
 			this.chatMessageService.saveChatMessage(dateMessage);
-			chatMessages.add(ChatMessageMapper.map(dateMessage));
+			store.add(ChatMessageMapper.map(dateMessage));
 		}
+	}
+
+	public void processChatMessageFromUser(DataTransferContainer transferMessage) {
+		ChatMessageDTO receivedMessage = transferMessage.getChatMessage();
+		List<ChatMessageDTO> responseMessages = new ArrayList<ChatMessageDTO>();
+
+		insertDateMessageIfNeeded(transferMessage, responseMessages);
 
 		Optional<ChatMessageDTO> chatMessageToBeShared = this.chatMessageService
-				.saveChatMessage(buildChatMessage(receivedMessage.getFromId(), receivedMessage.getBody(),receivedMessage.getRoomId(), transferMessage.getUnseenChatMessageIds(), false)).map(ChatMessageMapper::map);
+				.saveChatMessage(buildChatMessage(receivedMessage.getFromId(), receivedMessage.getBody(),
+						receivedMessage.getRoomId(), transferMessage.getUnseenChatMessageIds(), false))
+				.map(ChatMessageMapper::map);
 		if (chatMessageToBeShared.isPresent()) {
 			DataTransferContainer response = new DataTransferContainer();
 			response.setFunction("chat-message");
 			response.setChatRoomId(receivedMessage.getRoomId());
-			chatMessages.add(chatMessageToBeShared.get());
-			response.setChatMessages(chatMessages);
+			responseMessages.add(chatMessageToBeShared.get());
+
+			response.setChatMessages(responseMessages);
 
 			transferMessage.getUnseenChatMessageIds().stream().filter(userId -> onlineUsers.isOnline(userId))
 					.forEach(userId -> notifyClient(userId, response));
@@ -399,7 +408,8 @@ public class ChatService {
 		return notSeenBy;
 	}
 
-	private ChatMessage buildChatMessage(String fromId, String body, UUID chatRoomId, List<UUID> userIds, boolean randomizeId) {
+	private ChatMessage buildChatMessage(String fromId, String body, UUID chatRoomId, List<UUID> userIds,
+			boolean randomizeId) {
 		ChatMessage message = new ChatMessage();
 		message.setFromId(randomizeId ? fromId + Instant.now().toEpochMilli() : fromId);
 		message.setRoomId(chatRoomId);
@@ -462,7 +472,7 @@ public class ChatService {
 
 	/* DEBUG */
 
-	int countGeneratedUsers = 0;
+	static int countGeneratedUsers = 0;
 	List<String> userNamesList;
 
 	private static List<String> toList() {
