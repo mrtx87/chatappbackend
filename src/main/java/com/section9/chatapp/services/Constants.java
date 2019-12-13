@@ -3,6 +3,7 @@ package com.section9.chatapp.services;
 public class Constants {
 	public static final String SYSTEM_ID = "system";
 	public static final String SYSTEM_INIT_ID = "init";
+	public static final String CHAT_MESSAGE_DATE_TYPE = "date";
 	
 	public static final int ADDITIONAL_MESSAGES_SIZE = 30;
 	public static final int MESSAGE_BATCH_SIZE = 20;

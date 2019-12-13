@@ -1,6 +1,7 @@
 package com.section9.chatapp.services;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.section9.chatapp.dtos.ChatMessageDTO;
 import com.section9.chatapp.dtos.ChatRoomDTO;
-import com.section9.chatapp.dtos.TransferMessage;
+import com.section9.chatapp.dtos.DataTransferContainer;
 import com.section9.chatapp.dtos.UserDTO;
 import com.section9.chatapp.entities.ChatMessage;
 import com.section9.chatapp.entities.ChatRoom;
@@ -41,7 +42,6 @@ public class ChatService {
 	@Autowired
 	ChatMessageService chatMessageService;
 
-	
 	@Autowired
 	SimpMessagingTemplate messagingService;
 
@@ -56,10 +56,10 @@ public class ChatService {
 		userNamesList = toList();
 	}
 
-	public void finalizeWebSocketConnectionAndLogin(TransferMessage transferMessage) {
+	public void finalizeWebSocketConnectionAndLogin(DataTransferContainer transferMessage) {
 		Contact contact = transferMessage.getFrom();
 		onlineUsers.add(contact);
-		TransferMessage response = new TransferMessage();
+		DataTransferContainer response = new DataTransferContainer();
 		response.setFunction(Constants.TM_FUNCTION_LOGIN_AND_COOKIE);
 		response.setFrom(contact);
 
@@ -149,28 +149,32 @@ public class ChatService {
 		List<ChatMessageDTO> batchOfMessages = new ArrayList<>();
 		int batchSize = Constants.MESSAGE_BATCH_SIZE;
 		boolean found = false;
-		for(ChatMessage message : allChatMessages) {		
-			if(found) {
+		for (ChatMessage message : allChatMessages) {
+			if (found) {
 				batchOfMessages.add(0, ChatMessageMapper.map(message));
 				batchSize -= 1;
-				if(batchSize == 0) {
+				if (batchSize == 0) {
 					break;
 				}
 				continue;
 			}
-			
-			if(!found && message.getId().equals(lastMessageToken)){
+
+			if (!found && message.getId().equals(lastMessageToken)) {
 				found = true;
 			}
 		}
-		
+
 		return batchOfMessages;
 	}
 
-	public Optional<ChatRoomDTO> createRoom(TransferMessage transferMessage) {
+	public Optional<ChatRoomDTO> createRoom(DataTransferContainer transferMessage) {
 		ChatRoom chatRoom = chatRoomService.createRoom(transferMessage);
 		if (chatRoom != null) {
 			ChatRoomDTO chatRoomDTO = ChatRoomMapper.map(chatRoom);
+			ChatMessage initDateMessage = buildChatMessage(Constants.CHAT_MESSAGE_DATE_TYPE, Instant.now().truncatedTo(ChronoUnit.DAYS).toString(),
+					chatRoomDTO.getId(), chatRoomDTO.getUserIds());
+			chatMessageService.saveChatMessage(initDateMessage);
+			
 			ChatMessage initMessage = buildChatMessage(Constants.SYSTEM_INIT_ID, "New chat room created.",
 					chatRoomDTO.getId(), chatRoomDTO.getUserIds());
 			chatMessageService.saveChatMessage(initMessage);
@@ -186,7 +190,7 @@ public class ChatService {
 					userService.updateUser(user1.get());
 					userService.updateUser(user2.get());
 
-					TransferMessage response = new TransferMessage();
+					DataTransferContainer response = new DataTransferContainer();
 					response.setFrom(transferMessage.getFrom());
 					response.setChatroom(chatRoomDTO);
 					response.setFunction(Constants.TM_FUNCTION_CREATE_ROOM_AND_CONTACT);
@@ -194,7 +198,7 @@ public class ChatService {
 					notifyUserIfOnline(user2.get().getId(), response);
 				}
 			} else {
-				TransferMessage response = new TransferMessage();
+				DataTransferContainer response = new DataTransferContainer();
 				response.setFrom(transferMessage.getFrom());
 				response.setChatroom(chatRoomDTO);
 				response.setFunction(Constants.TM_FUNCTION_CREATE_GROUP_ROOM);
@@ -238,19 +242,19 @@ public class ChatService {
 		users.stream().forEach(user -> userService.updateUser(user));
 	}
 
-	private void notifyUserIfOnline(UUID userId, TransferMessage transferMessage) {
+	private void notifyUserIfOnline(UUID userId, DataTransferContainer transferMessage) {
 		if (isOnline(userId)) {
 			notifyClient(userId, transferMessage);
 		}
 	}
 
 	private void notifyUsers(List<User> users) {
-		TransferMessage transferMessage = new TransferMessage();
+		DataTransferContainer transferMessage = new DataTransferContainer();
 		transferMessage.setFunction(Constants.TM_FUNCTION_UPDATE_ROOMS_AND_CONTACTS);
 		users.stream().forEach(user -> notifyUserIfOnline(user.getId(), transferMessage));
 	}
 
-	public void processContactRemoving(TransferMessage transferMessage) {
+	public void processContactRemoving(DataTransferContainer transferMessage) {
 		List<UUID> contactsOfRoom = transferMessage.getChatRoom().getUserIds();
 		if (contactsOfRoom.size() == 2) {
 			ChatRoomDTO chatRoom = transferMessage.getChatRoom();
@@ -269,7 +273,7 @@ public class ChatService {
 		}
 	}
 
-	public void processChatRoomRemoving(TransferMessage transferMessage) {
+	public void processChatRoomRemoving(DataTransferContainer transferMessage) {
 		List<User> userList = getUsersById(transferMessage.getChatRoom().getUserIds());
 		removeChatRoom(transferMessage.getChatRoom(), userList);
 		removeChatMessages(transferMessage.getChatRoom().getId());
@@ -327,21 +331,41 @@ public class ChatService {
 		return Optional.empty();
 	}
 
-	public void processChatMessageFromUser(TransferMessage transferMessage) {
+	public ChatMessageDTO getLatestChatMessageByRoomId(UUID roomId) {
+		return chatMessageService.getLatestChatMessageByRoomId(roomId);
+	}
+	
+
+	public void processChatMessageFromUser(DataTransferContainer transferMessage) {
+		
+		ChatRoomDTO receivedChatRoom = transferMessage.getChatRoom();
+		
+		ChatMessageDTO latestChatMessage = getLatestChatMessageByRoomId(receivedChatRoom.getId());
+		Instant latestChatMessageDay = latestChatMessage.getCreatedAt().truncatedTo(ChronoUnit.DAYS);
+		Instant today = Instant.now().truncatedTo(ChronoUnit.DAYS);
+
+		List<ChatMessageDTO> chatMessages = new ArrayList<ChatMessageDTO>();
+		if(latestChatMessageDay.isBefore(today)) {
+			ChatMessage dateMessage = buildChatMessage(Constants.CHAT_MESSAGE_DATE_TYPE, Instant.now().truncatedTo(ChronoUnit.DAYS).toString() ,transferMessage.getChatRoom().getId(), transferMessage.getChatRoom().getUserIds());
+			this.chatMessageService.saveChatMessage(dateMessage);
+			chatMessages.add(ChatMessageMapper.map(dateMessage));
+		}
+
 		Optional<ChatMessageDTO> chatMessageToBeShared = this.chatMessageService
 				.saveChatMessage(buildChatMessage(transferMessage)).map(ChatMessageMapper::map);
 		if (chatMessageToBeShared.isPresent()) {
-
-			TransferMessage response = new TransferMessage();
+			DataTransferContainer response = new DataTransferContainer();
 			response.setFunction("chat-message");
-			response.setChatMessage(chatMessageToBeShared.get());
+			response.setChatRoomId(receivedChatRoom.getId());
+			chatMessages.add(chatMessageToBeShared.get());
+			response.setChatMessages(chatMessages);
 
 			transferMessage.getChatRoom().getUserIds().stream().filter(userId -> onlineUsers.isOnline(userId))
 					.forEach(userId -> notifyClient(userId, response));
 		}
 	}
 
-	public boolean updateUnseenChatMessages(TransferMessage transferMessage) {
+	public boolean updateUnseenChatMessages(DataTransferContainer transferMessage) {
 
 		for (UUID chatMessageId : transferMessage.getUnseenChatMessageIds()) {
 			ChatMessage chatMessage = chatMessageService.getChatMessage(chatMessageId);
@@ -353,11 +377,11 @@ public class ChatService {
 		return true;
 	}
 
-	private void notifyClient(UUID userId, TransferMessage response) {
+	private void notifyClient(UUID userId, DataTransferContainer response) {
 		this.messagingService.convertAndSend("/client/" + userId, response);
 	}
 
-	private void notifyClientsIfOnline(List<UUID> userIds, TransferMessage response) {
+	private void notifyClientsIfOnline(List<UUID> userIds, DataTransferContainer response) {
 		for (UUID id : userIds) {
 			notifyUserIfOnline(id, response);
 		}
@@ -378,8 +402,8 @@ public class ChatService {
 
 	private ChatMessage buildChatMessage(String fromId, String body, UUID chatRoomId, List<UUID> userIds) {
 		ChatMessage message = new ChatMessage();
+		message.setFromId(fromId + Instant.now().toEpochMilli());
 		message.setRoomId(chatRoomId);
-		message.setFromId(fromId);
 		message.setBody(body);
 		message.setCreatedAt(Instant.now());
 		message.setNotSeenBy(convertToNotSeenByString(
@@ -388,14 +412,17 @@ public class ChatService {
 		return message;
 	}
 
-	private ChatMessage buildChatMessage(TransferMessage transferMessage) {
+	private ChatMessage buildChatMessage(DataTransferContainer transferMessage) {
 
-		return buildChatMessage(transferMessage.getChatMessage().getFromId(),
-				transferMessage.getChatMessage().getBody(), transferMessage.getChatRoom().getId(),
-				transferMessage.getChatRoom().getUserIds());
+		return buildChatMessage(
+				transferMessage.getChatMessage().getFromId(),
+				transferMessage.getChatMessage().getBody(),
+				transferMessage.getChatRoom().getId(),
+				transferMessage.getChatRoom().getUserIds()
+				);
 	}
 
-	public void processDisconnectFromClient(TransferMessage transferMessage) {
+	public void processDisconnectFromClient(DataTransferContainer transferMessage) {
 		onlineUsers.delete(transferMessage.getFrom().getId());
 	}
 
@@ -414,7 +441,7 @@ public class ChatService {
 		return userService.getUserById(contactId).map(UserMapper::reduce).get();
 	}
 
-	public Contact updateUserProfile(UUID userId, TransferMessage transferMessage) {
+	public Contact updateUserProfile(UUID userId, DataTransferContainer transferMessage) {
 		Optional<User> user_ = userService.getUserById(userId);
 
 		if (user_.isPresent()) {
@@ -429,7 +456,7 @@ public class ChatService {
 		return null;
 	}
 
-	public ChatRoomDTO updateChatRoomProfile(UUID roomId, TransferMessage transferMessage) {
+	public ChatRoomDTO updateChatRoomProfile(UUID roomId, DataTransferContainer transferMessage) {
 
 		Optional<ChatRoom> chatRoom_ = chatRoomService.getRoomById(roomId);
 

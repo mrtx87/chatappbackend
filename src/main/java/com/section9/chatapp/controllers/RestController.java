@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.section9.chatapp.dtos.ChatMessageDTO;
 import com.section9.chatapp.dtos.ChatRoomDTO;
-import com.section9.chatapp.dtos.TransferMessage;
+import com.section9.chatapp.dtos.DataTransferContainer;
 import com.section9.chatapp.dtos.UserDTO;
 import com.section9.chatapp.entities.Contact;
 import com.section9.chatapp.repos.Credentials;
@@ -62,7 +62,7 @@ public class RestController {
 	}
 
 	@PostMapping(path = { "/data/create-room" })
-	public ResponseEntity<ChatRoomDTO> createRoom(@RequestBody TransferMessage transferMessage) {
+	public ResponseEntity<ChatRoomDTO> createRoom(@RequestBody DataTransferContainer transferMessage) {
 		Optional<ChatRoomDTO> chatRoomDTO = chatService.createRoom(transferMessage);
 		if (chatRoomDTO.isPresent()) {
 			return ResponseEntity.ok().body(chatRoomDTO.get());
@@ -72,19 +72,19 @@ public class RestController {
 	}
 
 	@PostMapping(path = { "/data/remove-contact" })
-	public ResponseEntity<Object> removeContact(@RequestBody TransferMessage transferMessage) {
+	public ResponseEntity<Object> removeContact(@RequestBody DataTransferContainer transferMessage) {
 		chatService.processContactRemoving(transferMessage);
 		return ResponseEntity.ok().build();
 	}
 
 	@PostMapping(path = { "/data/remove-chatroom" })
-	public ResponseEntity<List<Contact>> removeChatRoom(@RequestBody TransferMessage transferMessage) {
+	public ResponseEntity<List<Contact>> removeChatRoom(@RequestBody DataTransferContainer transferMessage) {
 		chatService.processChatRoomRemoving(transferMessage);
 		return ResponseEntity.ok().build();
 	}
 
 	@PostMapping(path = { "/data/update-unseen-messages" })
-	public ResponseEntity<ChatRoomDTO> updateUnseenChatMessages(@RequestBody TransferMessage transferMessage) {
+	public ResponseEntity<ChatRoomDTO> updateUnseenChatMessages(@RequestBody DataTransferContainer transferMessage) {
 		boolean success = chatService.updateUnseenChatMessages(transferMessage);
 		if (success) {
 			return ResponseEntity.ok().build();
@@ -95,7 +95,7 @@ public class RestController {
 
 	@PostMapping(path = { "/data/update/userId/{userId}" })
 	public ResponseEntity<Contact> updateUserProfile(@PathVariable("userId") UUID userId,
-			@RequestBody TransferMessage transferMessage) {
+			@RequestBody DataTransferContainer transferMessage) {
 		Contact contact = chatService.updateUserProfile(userId, transferMessage);
 		if (contact != null) {
 			return ResponseEntity.ok().body(contact);
@@ -106,7 +106,7 @@ public class RestController {
 
 	@PostMapping(path = { "/data/update/roomId/{roomId}" })
 	public ResponseEntity<ChatRoomDTO> updateChatRoomProfile(@PathVariable("roomId") UUID roomId,
-			@RequestBody TransferMessage transferMessage) {
+			@RequestBody DataTransferContainer transferMessage) {
 		ChatRoomDTO chatRoomDTO = chatService.updateChatRoomProfile(roomId, transferMessage);
 		if (chatRoomDTO != null) {
 			return ResponseEntity.ok().body(chatRoomDTO);

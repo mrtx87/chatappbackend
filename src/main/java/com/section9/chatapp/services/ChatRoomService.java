@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.section9.chatapp.dtos.ChatRoomDTO;
-import com.section9.chatapp.dtos.TransferMessage;
+import com.section9.chatapp.dtos.DataTransferContainer;
 import com.section9.chatapp.dtos.UserDTO;
 import com.section9.chatapp.entities.ChatMessage;
 import com.section9.chatapp.entities.ChatRoom;
@@ -39,7 +39,7 @@ public class ChatRoomService {
 		return chatRoomRepository.findAll();
 	}
 
-	public ChatRoom createRoom(TransferMessage transferMessage) {
+	public ChatRoom createRoom(DataTransferContainer transferMessage) {
 
 		return chatRoomRepository.save(ChatRoomMapper.create(transferMessage.getChatRoom()));
 	}

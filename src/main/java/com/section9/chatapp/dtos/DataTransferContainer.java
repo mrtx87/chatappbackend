@@ -6,12 +6,13 @@ import java.util.UUID;
 import com.section9.chatapp.entities.ChatMessage;
 import com.section9.chatapp.entities.Contact;
 
-public class TransferMessage {
+public class DataTransferContainer {
 
 	private String function;
 	private Contact from;
 	private UUID chatRoomId;
 	private ChatMessageDTO chatMessage;
+	private List<ChatMessageDTO> chatMessages;
 	private ChatRoomDTO chatRoom;
 	private List<Contact> contactsList;
     List<UUID> unseenChatMessageIds; 
@@ -35,6 +36,13 @@ public class TransferMessage {
 	}
 	public void setChatMessage(ChatMessageDTO chatMessage) {
 		this.chatMessage = chatMessage;
+	}
+
+	public List<ChatMessageDTO> getChatMessages() {
+		return chatMessages;
+	}
+	public void setChatMessages(List<ChatMessageDTO> chatMessages) {
+		this.chatMessages = chatMessages;
 	}
 	public ChatRoomDTO getChatRoom() {
 		return chatRoom;
