@@ -2,6 +2,7 @@ package com.section9.chatapp.entities;
 
 import java.util.List;
 import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -26,7 +27,7 @@ public class User {
 	private String password;
 	@Nullable
 	@Lob 
-	@Column(length=1024)
+	@Column(length=2048)
 	private String iconUrl;
 
 	@Nullable

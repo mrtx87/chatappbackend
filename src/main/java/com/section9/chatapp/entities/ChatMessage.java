@@ -3,9 +3,11 @@ package com.section9.chatapp.entities;
 import java.time.Instant;
 import java.util.UUID;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.validation.constraints.NotNull;
 
 @Entity
@@ -18,6 +20,10 @@ public class ChatMessage {
 	UUID roomId;
 	@NotNull
 	String fromId;
+	
+	@NotNull
+	@Lob 
+	@Column(length=2048)
 	String body;
 	@NotNull
 	Instant createdAt;
