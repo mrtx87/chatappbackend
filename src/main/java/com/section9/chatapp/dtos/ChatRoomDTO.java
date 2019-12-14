@@ -3,13 +3,6 @@ package com.section9.chatapp.dtos;
 import java.util.List;
 import java.util.UUID;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-
-import org.springframework.lang.Nullable;
-
-
 public class ChatRoomDTO {
 
 	UUID id;

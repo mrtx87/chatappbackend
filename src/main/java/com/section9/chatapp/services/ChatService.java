@@ -9,7 +9,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -20,15 +19,11 @@ import com.section9.chatapp.dtos.UserDTO;
 import com.section9.chatapp.entities.ChatMessage;
 import com.section9.chatapp.entities.ChatRoom;
 import com.section9.chatapp.entities.Contact;
-import com.section9.chatapp.entities.Cookie;
 import com.section9.chatapp.entities.User;
 import com.section9.chatapp.mapper.ChatMessageMapper;
 import com.section9.chatapp.mapper.ChatRoomMapper;
 import com.section9.chatapp.mapper.UserMapper;
-import com.section9.chatapp.repos.ChatRoomRepository;
 import com.section9.chatapp.repos.Credentials;
-
-import javassist.expr.NewArray;
 
 @Service
 public class ChatService {
@@ -173,11 +168,11 @@ public class ChatService {
 			ChatRoomDTO chatRoomDTO = ChatRoomMapper.map(chatRoom);
 			ChatMessage initDateMessage = buildChatMessage(Constants.CHAT_MESSAGE_DATE_TYPE,
 					Instant.now().truncatedTo(ChronoUnit.DAYS).toString(), chatRoomDTO.getId(),
-					chatRoomDTO.getUserIds(), true);
+					chatRoomDTO.getUserIds(), true, 0);
 			chatMessageService.saveChatMessage(initDateMessage);
 
 			ChatMessage initMessage = buildChatMessage(Constants.SYSTEM_INIT_ID, "New chat room created.",
-					chatRoomDTO.getId(), chatRoomDTO.getUserIds(), true);
+					chatRoomDTO.getId(), chatRoomDTO.getUserIds(), true, 100);
 			chatMessageService.saveChatMessage(initMessage);
 
 			if (!chatRoom.isGroupChat()) {
@@ -344,7 +339,7 @@ public class ChatService {
 		if (latestChatMessageDay.isBefore(today)) {
 			ChatMessage dateMessage = buildChatMessage(Constants.CHAT_MESSAGE_DATE_TYPE,
 					Instant.now().truncatedTo(ChronoUnit.DAYS).toString(), dtc.getChatMessage().getRoomId(),
-					dtc.getUnseenChatMessageIds(), true);
+					dtc.getUnseenChatMessageIds(), true, 0);
 			this.chatMessageService.saveChatMessage(dateMessage);
 			store.add(ChatMessageMapper.map(dateMessage));
 		}
@@ -358,7 +353,7 @@ public class ChatService {
 
 		Optional<ChatMessageDTO> chatMessageToBeShared = this.chatMessageService
 				.saveChatMessage(buildChatMessage(receivedMessage.getFromId(), receivedMessage.getBody(),
-						receivedMessage.getRoomId(), transferMessage.getUnseenChatMessageIds(), false))
+						receivedMessage.getRoomId(), transferMessage.getUnseenChatMessageIds(), false, 100))
 				.map(ChatMessageMapper::map);
 		if (chatMessageToBeShared.isPresent()) {
 			DataTransferContainer response = new DataTransferContainer();
@@ -389,11 +384,6 @@ public class ChatService {
 		this.messagingService.convertAndSend("/client/" + userId, response);
 	}
 
-	private void notifyClientsIfOnline(List<UUID> userIds, DataTransferContainer response) {
-		for (UUID id : userIds) {
-			notifyUserIfOnline(id, response);
-		}
-	}
 
 	private String convertToNotSeenByString(List<UUID> ids) {
 		String notSeenBy = "";
@@ -409,12 +399,12 @@ public class ChatService {
 	}
 
 	private ChatMessage buildChatMessage(String fromId, String body, UUID chatRoomId, List<UUID> userIds,
-			boolean randomizeId) {
+			boolean randomizeId, int timeOffset) {
 		ChatMessage message = new ChatMessage();
 		message.setFromId(randomizeId ? fromId + Instant.now().toEpochMilli() : fromId);
 		message.setRoomId(chatRoomId);
 		message.setBody(body);
-		message.setCreatedAt(Instant.now());
+		message.setCreatedAt(Instant.now().plusMillis(timeOffset));
 		message.setNotSeenBy(convertToNotSeenByString(
 				userIds.stream().filter(userId -> !fromId.equals(userId)).collect(Collectors.toList())));
 		// message.setNotSeenBy(userIds);

@@ -1,13 +1,11 @@
 package com.section9.chatapp.controllers;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +19,6 @@ import com.section9.chatapp.dtos.DataTransferContainer;
 import com.section9.chatapp.dtos.UserDTO;
 import com.section9.chatapp.entities.Contact;
 import com.section9.chatapp.repos.Credentials;
-import com.section9.chatapp.services.ChatMessageService;
 import com.section9.chatapp.services.ChatService;
 
 @org.springframework.web.bind.annotation.RestController

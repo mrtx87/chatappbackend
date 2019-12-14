@@ -1,17 +1,10 @@
 package com.section9.chatapp.controllers;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-
-import com.section9.chatapp.dtos.ChatRoomDTO;
 import com.section9.chatapp.dtos.DataTransferContainer;
 import com.section9.chatapp.services.ChatService;
  

@@ -3,7 +3,6 @@ package com.section9.chatapp.dtos;
 import java.util.List;
 import java.util.UUID;
 
-import com.section9.chatapp.entities.ChatMessage;
 import com.section9.chatapp.entities.Contact;
 
 public class DataTransferContainer {

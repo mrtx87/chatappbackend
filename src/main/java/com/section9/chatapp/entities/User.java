@@ -2,16 +2,12 @@ package com.section9.chatapp.entities;
 
 import java.util.List;
 import java.util.UUID;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Lob;
-import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.lang.Nullable;

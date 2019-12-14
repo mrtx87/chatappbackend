@@ -1,15 +1,7 @@
 package com.section9.chatapp.dtos;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
-
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.validation.constraints.NotNull;
 
 public class ChatMessageDTO {
 

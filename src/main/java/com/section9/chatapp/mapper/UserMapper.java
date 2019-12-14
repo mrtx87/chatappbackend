@@ -1,7 +1,5 @@
 package com.section9.chatapp.mapper;
 
-import java.util.stream.Collectors;
-
 import com.section9.chatapp.dtos.UserDTO;
 import com.section9.chatapp.entities.Contact;
 import com.section9.chatapp.entities.User;
