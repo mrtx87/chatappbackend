@@ -244,10 +244,28 @@ public class ChatService {
 		}
 	}
 
-	private void notifyUsers(List<User> users) {
-		DataTransferContainer transferMessage = new DataTransferContainer();
-		transferMessage.setFunction(Constants.TM_FUNCTION_UPDATE_ROOMS_AND_CONTACTS);
+	private void notifyUsersIfOnline(List<User> users, DataTransferContainer transferMessage) {
 		users.stream().forEach(user -> notifyUserIfOnline(user.getId(), transferMessage));
+	}
+
+	private void notifyContactsIfOnline(List<Contact> users, DataTransferContainer transferMessage) {
+		users.stream().forEach(user -> notifyUserIfOnline(user.getId(), transferMessage));
+	}
+
+	private void notifyUsersByIdIfOnline(List<UUID> userIds, DataTransferContainer transferMessage) {
+		userIds.stream().forEach(userId -> notifyUserIfOnline(userId, transferMessage));
+	}
+
+	private void notifyUsersAboutCallForAction(List<User> users, String function) {
+		DataTransferContainer transferMessage = new DataTransferContainer();
+		transferMessage.setFunction(function);
+		users.stream().forEach(user -> notifyUserIfOnline(user.getId(), transferMessage));
+	}
+
+	private void notifyUsersById(List<UUID> userIds, String function) {
+		DataTransferContainer transferMessage = new DataTransferContainer();
+		transferMessage.setFunction(function);
+		userIds.stream().forEach(userId -> notifyUserIfOnline(userId, transferMessage));
 	}
 
 	public void processContactRemoving(DataTransferContainer transferMessage) {
@@ -259,7 +277,7 @@ public class ChatService {
 				removeChatRoom(chatRoom, userList);
 				removeChatMessages(chatRoom.getId());
 				updateUsers(userList);
-				notifyUsers(userList);
+				notifyUsersAboutCallForAction(userList, Constants.TM_FUNCTION_UPDATE_ROOMS_AND_CONTACTS);
 			} else {
 				System.err.println("Contacts could not be removed.");
 			}
@@ -274,7 +292,7 @@ public class ChatService {
 		removeChatRoom(transferMessage.getChatRoom(), userList);
 		removeChatMessages(transferMessage.getChatRoom().getId());
 		updateUsers(userList);
-		notifyUsers(userList);
+		notifyUsersAboutCallForAction(userList, Constants.TM_FUNCTION_UPDATE_ROOMS_AND_CONTACTS);
 	}
 
 	private boolean unlinkContactRelation(List<User> userList) {
@@ -384,7 +402,6 @@ public class ChatService {
 		this.messagingService.convertAndSend("/client/" + userId, response);
 	}
 
-
 	private String convertToNotSeenByString(List<UUID> ids) {
 		String notSeenBy = "";
 		for (int i = 0; i < ids.size(); i++) {
@@ -440,7 +457,13 @@ public class ChatService {
 			user.setName(transferMessage.getFrom().getName());
 			userService.updateUser(user);
 
-			return UserMapper.reduce(user);
+			Contact updatedContact = UserMapper.reduce(user);
+		  /*DataTransferContainer dtc = new DataTransferContainer();
+			dtc.setFunction(Constants.TM_FUNCTION_UPDATE_SINGLE_USER_PROFILE);
+			dtc.setFrom(updatedContact);
+			notifyUsersByIdIfOnline(user.getContacts(), dtc);*/
+			
+			return updatedContact;
 		}
 		return null;
 	}
@@ -453,9 +476,15 @@ public class ChatService {
 			ChatRoom chatRoom = chatRoom_.get();
 			chatRoom.setTitle(transferMessage.getChatRoom().getTitle());
 			chatRoom.setIconUrl(transferMessage.getChatRoom().getIconUrl());
+			chatRoom.setDescription(transferMessage.getChatRoom().getDescription());
 			chatRoomService.updateChatRoom(chatRoom);
 
-			return ChatRoomMapper.map(chatRoom);
+			ChatRoomDTO updatedChatRoomDTO = ChatRoomMapper.map(chatRoom);
+			DataTransferContainer dtc = new DataTransferContainer();
+			dtc.setFunction(Constants.TM_FUNCTION_UPDATE_SINGLE_GROUP_PROFILE);
+			dtc.setChatRoom(updatedChatRoomDTO);
+			notifyUsersByIdIfOnline(chatRoom.getUserIds(), dtc);
+			return updatedChatRoomDTO;
 		}
 		return null;
 	}

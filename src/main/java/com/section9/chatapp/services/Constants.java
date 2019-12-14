@@ -11,6 +11,10 @@ public class Constants {
 
 	// TransferMessage functions
 	public static final String TM_FUNCTION_UPDATE_ROOMS_AND_CONTACTS = "update-rooms-and-contacts";
+	
+	public static final String TM_FUNCTION_UPDATE_SINGLE_USER_PROFILE = "update-single-user-profile";
+	public static final String TM_FUNCTION_UPDATE_SINGLE_GROUP_PROFILE = "update-single-group-profile";
+
 
 	public static final String TM_FUNCTION_LOGIN_AND_COOKIE = "login-and-cookie";
 

@@ -22,6 +22,9 @@ public class ChatRoom {
 	@Nullable
 	String title;
 	
+	@Nullable
+	String description;
+	
 	@ElementCollection
 	List<UUID> userIds;
 	
@@ -77,5 +80,15 @@ public class ChatRoom {
 	public void setTitle(String title) {
 		this.title = title;
 	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	
+	
 
 }
