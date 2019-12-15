@@ -25,7 +25,7 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, UUID> 
 			+ " ORDER BY CREATED_AT ASC", nativeQuery = true)
 	public List<ChatMessage> getAllChatMessagesAsc(@Param("roomId") UUID roomId);
 
-	@Query(value = "SELECT * FROM CHAT_MESSAGE m" + " WHERE m.room_id = :roomId" + " ORDER BY CREATED_AT ASC"
+	@Query(value = "SELECT * FROM CHAT_MESSAGE m" + " WHERE m.room_id = :roomId" + " ORDER BY CREATED_AT DESC"
 			+ " LIMIT 1", nativeQuery = true)
 	public ChatMessage getLatestChatMessageByRoomId(@Param("roomId") UUID roomId);
 

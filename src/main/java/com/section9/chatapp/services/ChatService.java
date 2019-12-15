@@ -483,7 +483,7 @@ public class ChatService {
 			DataTransferContainer dtc = new DataTransferContainer();
 			dtc.setFunction(Constants.TM_FUNCTION_UPDATE_SINGLE_GROUP_PROFILE);
 			dtc.setChatRoom(updatedChatRoomDTO);
-			notifyUsersByIdIfOnline(chatRoom.getUserIds(), dtc);
+			notifyUsersByIdIfOnline(chatRoom.getUserIds().stream().filter(id -> !id.equals(transferMessage.getFrom().getId())).collect(Collectors.toList()), dtc);
 			return updatedChatRoomDTO;
 		}
 		return null;
